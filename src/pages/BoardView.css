@@ -1,0 +1,44 @@
+.board {
+  width: min(var(--maxw), 100%);
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.board__title {
+  font-family: var(--sans);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.board__subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.board__form {
+  margin-top: 24px;
+}
+
+.board__section {
+  margin-top: 48px;
+}
+
+.board__notes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.board__empty {
+  color: var(--muted);
+}
+
+.board__error {
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+}

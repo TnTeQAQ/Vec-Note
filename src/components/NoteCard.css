@@ -1,0 +1,66 @@
+.note-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.note-card:hover {
+  background: var(--fg);
+  color: var(--bg);
+  transform: translateY(-2px);
+}
+
+.note-card__content {
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 反色时保持子元素可读 */
+.note-card:hover .cipher-chip {
+  color: var(--bg);
+  opacity: 0.8;
+}
+
+.note-card:hover .cipher-chip__code {
+  background: color-mix(in srgb, var(--bg) 18%, transparent);
+}
+
+.note-card:hover .cipher-chip__copy {
+  color: var(--bg);
+  border-color: color-mix(in srgb, var(--bg) 45%, transparent);
+}
+
+.note-card:hover .cipher-chip__copy:hover {
+  background: var(--bg);
+  color: var(--fg);
+  border-color: var(--bg);
+}
+
+.note-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  transition: color 180ms ease;
+}
+
+.note-card:hover .note-card__meta {
+  color: var(--bg);
+  opacity: 0.72;
+}
+
+.note-card__id {
+  font-family: var(--mono);
+  letter-spacing: 0;
+}

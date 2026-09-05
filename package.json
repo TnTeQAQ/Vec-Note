@@ -1,0 +1,36 @@
+{
+  "name": "vec-note",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimalist note board: title n-gram vectorization + BLS12-381 signature-as-ciphertext, on Cloudflare Workers + D1.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build && wrangler dev",
+    "preview": "vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:create": "wrangler d1 create vec-note",
+    "dry-run": "wrangler deploy --dry-run",
+    "db:migrate:local": "wrangler d1 migrations apply vec-note --local",
+    "db:migrate:remote": "wrangler d1 migrations apply vec-note --remote"
+  },
+  "dependencies": {
+    "@fontsource/montserrat": "^5.3.0",
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260904.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0",
+    "wrangler": "^4.129.0"
+  }
+}

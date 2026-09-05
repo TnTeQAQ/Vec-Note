@@ -1,0 +1,139 @@
+.home {
+  width: min(var(--maxw), 100%);
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.home__hero {
+  position: relative;
+  min-height: calc(100svh - 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 0;
+  /* 点阵网格背景，呼应「向量空间」 */
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--fg) 22%, transparent) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 26px 26px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
+}
+
+.home__hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 640px;
+}
+
+.home__title {
+  font-family: var(--sans);
+  font-size: clamp(2.4rem, 7vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--fg);
+}
+
+.home__subtitle {
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.home__cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.home__section {
+  margin-top: 64px;
+}
+
+.home__notes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.home__empty {
+  color: var(--muted);
+}
+
+.home__features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.home__feature {
+  height: 100%;
+  padding: 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.home__feature:hover {
+  background: var(--fg);
+  color: var(--bg);
+  transform: translateY(-2px);
+}
+
+.home__feature-title {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+.home__feature-body {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  transition: color 180ms ease;
+}
+
+.home__feature:hover .home__feature-body {
+  color: var(--bg);
+  opacity: 0.82;
+}
+
+.home__about {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.home__link {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin-left: 8px;
+  font: inherit;
+  font-weight: 800;
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 680px) {
+  .home__features {
+    grid-template-columns: 1fr;
+  }
+}

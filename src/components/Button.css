@@ -1,0 +1,98 @@
+.btn {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  will-change: transform;
+  transform: scale(var(--btn-scale, 1));
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.btn--md {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.btn--lg {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+
+.btn--solid {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.btn--solid:hover:not(:disabled) {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--fg);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--border-soft);
+}
+
+.btn--outline:hover:not(:disabled) {
+  border-color: var(--fg);
+}
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: btn-ripple-grow 480ms var(--ease-out) forwards,
+    btn-ripple-fade 480ms ease forwards;
+}
+
+@keyframes btn-ripple-grow {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes btn-ripple-fade {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0;
+  }
+}

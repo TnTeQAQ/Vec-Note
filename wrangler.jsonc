@@ -1,0 +1,16 @@
+{
+  "name": "vec-note",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-09-04",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vec-note",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

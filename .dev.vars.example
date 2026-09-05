@@ -1,0 +1,2 @@
+# 本地开发用：复制为 .dev.vars 并填入任意 32+ 字节随机串。
+VEC_SEAL_SECRET=replace-with-a-long-random-secret

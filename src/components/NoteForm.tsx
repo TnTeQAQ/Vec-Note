@@ -1,0 +1,96 @@
+import { useState } from 'react';
+import { embed } from '../lib/embed';
+import { signTitle } from '../lib/crypto';
+import { createNote } from '../lib/api';
+import Button from './Button';
+import './NoteForm.css';
+
+/**
+ * 发布留言：标题在浏览器本地向量化 + BLS 签名（即密文），只上传
+ * 内容 + 公开向量 + 密文；标题明文从不离开浏览器。
+ */
+export default function NoteForm({ onCreated }: { onCreated: () => void }) {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [cipher, setCipher] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !submitting;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setCipher(null);
+
+    const vector = embed(title);
+    if (!vector) {
+      setError('标题经规范化后为空，请输入有效标题');
+      return;
+    }
+
+    let ct: string;
+    try {
+      ct = signTitle(title);
+    } catch (err) {
+      setError('加密失败：' + (err instanceof Error ? err.message : String(err)));
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const note = await createNote(content.trim(), vector, ct);
+      setCipher(note.ciphertext);
+      setTitle('');
+      setContent('');
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form className="note-form" onSubmit={handleSubmit}>
+      <label className="field-label" htmlFor="note-title">
+        标题（不会被存储，仅本地向量化 + 加密）
+      </label>
+      <input
+        className="field"
+        id="note-title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="例如：手机"
+        autoComplete="off"
+      />
+
+      <label className="field-label" htmlFor="note-content">
+        内容
+      </label>
+      <textarea
+        className="field"
+        id="note-content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="例如：测试内容"
+        rows={4}
+      />
+
+      <div className="note-form__actions">
+        {/* Button spreads {…rest} last, so type="submit" overrides its
+            built-in type="button" and this becomes the real submit trigger. */}
+        <Button type="submit" variant="solid" disabled={!canSubmit}>
+          {submitting ? '提交中…' : '发布留言'}
+        </Button>
+      </div>
+
+      {error && <p className="note-form__error">{error}</p>}
+      {cipher && (
+        <p className="note-form__hint">
+          已生成密文：<code className="selectable">{cipher.slice(0, 26)}…</code>（标题明文未上传）
+        </p>
+      )}
+    </form>
+  );
+}

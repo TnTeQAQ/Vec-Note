@@ -1,0 +1,21 @@
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge--ok {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.badge--sim {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border-soft);
+}

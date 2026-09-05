@@ -1,0 +1,46 @@
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 24px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.note-form .field-label {
+  margin-top: 10px;
+}
+
+.note-form .field-label:first-of-type {
+  margin-top: 0;
+}
+
+.note-form__actions {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.note-form__error {
+  margin-top: 12px;
+  color: var(--danger, #b3261e);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note-form__hint {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.note-form__hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--border-soft);
+  padding: 2px 8px;
+  border-radius: 6px;
+  word-break: break-all;
+}

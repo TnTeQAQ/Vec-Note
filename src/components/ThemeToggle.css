@@ -1,0 +1,36 @@
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.theme-toggle:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+/* Floating action button placement (bottom-right) */
+.theme-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+}
+
+.theme-fab .theme-toggle {
+  width: 46px;
+  height: 46px;
+  font-size: 18px;
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--fg) 24%, transparent);
+}
