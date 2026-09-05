@@ -54,7 +54,7 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
   return (
     <form className="note-form" onSubmit={handleSubmit}>
       <label className="field-label" htmlFor="note-title">
-        标题（不会被存储，仅本地向量化 + 加密）
+        标题
       </label>
       <input
         className="field"
@@ -88,7 +88,7 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
       {error && <p className="note-form__error">{error}</p>}
       {cipher && (
         <p className="note-form__hint">
-          已生成密文：<code className="selectable">{cipher.slice(0, 26)}…</code>（标题明文未上传）
+          已生成密文：<code className="selectable">{cipher.slice(0, 26)}…</code>
         </p>
       )}
     </form>

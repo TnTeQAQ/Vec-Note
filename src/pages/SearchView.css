@@ -12,13 +12,6 @@
   line-height: 1.15;
 }
 
-.search__subtitle {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--muted);
-}
-
 .search__bar {
   margin-top: 24px;
 }
@@ -102,28 +95,4 @@
 .search-result:hover .search-result__meta {
   color: var(--bg);
   opacity: 0.72;
-}
-
-.search__tips {
-  margin-top: 32px;
-  padding: 20px 22px;
-  border: 2px solid var(--border-soft);
-  border-radius: var(--radius);
-}
-
-.search__tips-title {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-.search__tips-list {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 14px;
-  line-height: 1.9;
-  color: var(--muted);
 }

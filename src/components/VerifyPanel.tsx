@@ -29,9 +29,6 @@ export default function VerifyPanel() {
 
   return (
     <section className="verify-panel">
-      <p className="verify-panel__intro">
-        手动核查：从搜索结果里把「密文」复制下来，输入候选标题，解密成功即证明它确由该标题生成。
-      </p>
       <form className="verify-panel__form" onSubmit={handleVerify}>
         <label className="field-label" htmlFor="verify-cipher">
           密文

@@ -5,13 +5,6 @@
   background: var(--bg);
 }
 
-.verify-panel__intro {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.65;
-  margin-bottom: 18px;
-}
-
 .verify-panel__form {
   display: flex;
   flex-direction: column;

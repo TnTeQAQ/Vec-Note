@@ -15,10 +15,6 @@ export default function SearchView() {
     <div className="search">
       <Reveal>
         <h1 className="search__title">搜索</h1>
-        <p className="search__subtitle">
-          查询词本地向量化 → Worker 密封后按余弦相似度召回 Top-10（不返回相似度与向量）
-          → 前端对每条结果 BLS 验签。
-        </p>
       </Reveal>
 
       <Reveal delay={80}>
@@ -33,9 +29,7 @@ export default function SearchView() {
             「{outcome.query}」 · {outcome.results.length} 条候选
           </p>
           {outcome.results.length === 0 ? (
-            <p className="search__empty">
-              未找到匹配项。当前为字符 n-gram 重叠匹配：无共享字符的近似词（如「电话」搜「手机」）不会命中。
-            </p>
+            <p className="search__empty">未找到匹配项。</p>
           ) : (
             <div className="search__list">
               {outcome.results.map((r, index) => {
@@ -59,18 +53,7 @@ export default function SearchView() {
             </div>
           )}
         </section>
-      ) : (
-        <Reveal delay={140}>
-          <div className="search__tips">
-            <p className="search__tips-title">对照示例</p>
-            <ul className="search__tips-list">
-              <li>搜「手机」→ 命中，显示「✓ 解密成功」</li>
-              <li>搜「手」→ 命中（共享字符，向量重叠），显示「相似候选」</li>
-              <li>搜「电话」→ 不命中（仅字符 n-gram，无共享字符；这是已接受的取舍）</li>
-            </ul>
-          </div>
-        </Reveal>
-      )}
+      ) : null}
     </div>
   );
 }

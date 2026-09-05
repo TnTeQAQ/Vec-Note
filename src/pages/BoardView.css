@@ -12,13 +12,6 @@
   line-height: 1.15;
 }
 
-.board__subtitle {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--muted);
-}
-
 .board__form {
   margin-top: 24px;
 }

@@ -32,9 +32,6 @@ export default function BoardView() {
     <div className="board">
       <Reveal>
         <h1 className="board__title">留言板</h1>
-        <p className="board__subtitle">
-          标题仅在浏览器内向量化与签名，明文不上传；Worker 密封向量后落库。
-        </p>
       </Reveal>
 
       <Reveal delay={80} className="board__form">

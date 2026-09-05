@@ -7,21 +7,6 @@ import SectionHead from '../components/SectionHead';
 import NoteCard from '../components/NoteCard';
 import './HomeView.css';
 
-const FEATURES = [
-  {
-    title: '向量召回',
-    body: '标题在浏览器内被字符 n-gram 向量化，只上传公开向量。搜索按余弦相似度返回 Top-10 相似候选。',
-  },
-  {
-    title: '签名即密文',
-    body: '标题的 BLS12-381 签名作为「密文」入库。明文不可从签名反推，验签通过才算「解密成功」。',
-  },
-  {
-    title: '服务端密封',
-    body: 'Worker 用仅服务端持有的密钥对向量做「签名置换」密封：精确保持余弦，数据库无法反推标题。',
-  },
-];
-
 export default function HomeView() {
   // home teaser: only the most recent notes
   const [notes, setNotes] = useState<Note[]>([]);
@@ -55,10 +40,7 @@ export default function HomeView() {
             <h1 className="home__title">Vec-Note</h1>
           </Reveal>
           <Reveal delay={160}>
-            <p className="home__subtitle">
-              向量留言板 —— 标题明文从不离开浏览器、从不入库：
-              被向量化用于近似检索，被 BLS12-381 签名（作为密文）用于唯一验证。
-            </p>
+            <p className="home__subtitle">留言 + 搜索，标题明文从不入库。</p>
           </Reveal>
           <Reveal delay={240}>
             <div className="home__cta">
@@ -85,36 +67,6 @@ export default function HomeView() {
           ))}
           {notes.length === 0 ? <p className="home__empty">还没有留言，去写下第一条吧。</p> : null}
         </div>
-      </section>
-
-      <section className="home__section">
-        <Reveal>
-          <SectionHead title="How it works" />
-        </Reveal>
-        <div className="home__features">
-          {FEATURES.map((f, index) => (
-            <Reveal key={f.title} delay={index * 70}>
-              <div className="home__feature">
-                <h3 className="home__feature-title">{f.title}</h3>
-                <p className="home__feature-body">{f.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="home__section">
-        <Reveal>
-          <SectionHead title="About" />
-        </Reveal>
-        <Reveal delay={60}>
-          <p className="home__about">
-            一份「非对称签名/验签 + 密文不可反推标题」形态的最小演示。完整密码学说明与已知取舍
-            <button type="button" className="home__link" onClick={(e) => go('about', e)}>
-              阅读更多 →
-            </button>
-          </p>
-        </Reveal>
       </section>
     </div>
   );
