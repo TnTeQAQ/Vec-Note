@@ -6,12 +6,12 @@ import './VerifyPanel.css';
 
 /**
  * 解密实验台核心块：粘贴密文 + 输入候选标题 → 前端 BLS 验签，
- * 验签通过即「解密成功」，否则是相似候选。
+ * 通过显示「✓ 验证成功」，失败显示「✗ 验证失败」。
  */
 export default function VerifyPanel() {
   const [cipher, setCipher] = useState('');
   const [title, setTitle] = useState('');
-  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [result, setResult] = useState<boolean | null>(null);
 
   function handleVerify(e: React.FormEvent) {
     e.preventDefault();
@@ -19,12 +19,7 @@ export default function VerifyPanel() {
     const t = title.trim();
     if (!c || !t) return;
 
-    const outcome = decryptTitle(c, t);
-    setResult(
-      outcome.ok
-        ? { ok: true, text: '解密成功' }
-        : { ok: false, text: '验证失败：该密文不是由这个标题生成的' },
-    );
+    setResult(decryptTitle(c, t).ok);
   }
 
   return (
@@ -58,10 +53,12 @@ export default function VerifyPanel() {
           </Button>
         </div>
       </form>
-      {result && (
-        <div className={`verify-panel__result ${result.ok ? 'verify-panel__result--ok' : ''}`}>
-          <Badge ok={result.ok} label={result.ok ? '✓ 解密成功' : '✗ 验证失败'} />
-          <span className="verify-panel__result-text">{result.text}</span>
+      {result !== null && (
+        <div className={`verify-panel__result ${result ? 'verify-panel__result--ok' : ''}`}>
+          <Badge ok={result} label={result ? '✓ 验证成功' : '✗ 验证失败'} />
+          {!result && (
+            <span className="verify-panel__result-text">该密文不是由这个标题生成的</span>
+          )}
         </div>
       )}
     </section>
