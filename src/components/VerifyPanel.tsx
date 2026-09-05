@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { decryptTitle } from '../lib/decrypt';
+import { takeVerifyCipher } from '../lib/verify-handoff';
 import Button from './Button';
 import Badge from './Badge';
 import './VerifyPanel.css';
@@ -12,6 +13,12 @@ export default function VerifyPanel() {
   const [cipher, setCipher] = useState('');
   const [title, setTitle] = useState('');
   const [result, setResult] = useState<boolean | null>(null);
+
+  // 从搜索卡片「去验证」跳转过来时，自动填入携带的密文（只填入，不自动验证）
+  useEffect(() => {
+    const pending = takeVerifyCipher();
+    if (pending) setCipher(pending);
+  }, []);
 
   function handleVerify(e: React.FormEvent) {
     e.preventDefault();

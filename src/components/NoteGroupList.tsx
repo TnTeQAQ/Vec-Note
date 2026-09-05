@@ -71,7 +71,7 @@ export default function NoteGroupList({ notes }: { notes: Note[] }) {
               {!isCollapsed && (
                 <div className="note-group__items">
                   {group.items.map((note) => (
-                    <NoteCard key={note.id} note={note} hideChip />
+                    <NoteCard key={note.id} note={note} hideChip verify />
                   ))}
                 </div>
               )}
