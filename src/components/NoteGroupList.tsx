@@ -23,7 +23,11 @@ export default function NoteGroupList({ notes }: { notes: Note[] }) {
       list.push(note);
       byCipher.set(note.ciphertext, list);
     }
-    return [...byCipher.entries()].map(([ciphertext, items]) => ({ ciphertext, items }));
+    // 组内按创建时间先后排序（早 → 晚）
+    return [...byCipher.entries()].map(([ciphertext, items]) => ({
+      ciphertext,
+      items: items.sort((a, b) => a.created_at - b.created_at),
+    }));
   }, [notes]);
 
   const toggle = (ciphertext: string) => {
