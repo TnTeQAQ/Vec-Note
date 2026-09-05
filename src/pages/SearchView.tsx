@@ -44,27 +44,18 @@ export default function SearchView() {
             <p className="search__empty">未找到匹配项。</p>
           ) : (
             <div className="search__list">
-              {outcome.results.map((r, index) => {
-                const pct =
-                  typeof r.similarity === 'number'
-                    ? `${(r.similarity * 100).toFixed(1)}%`
-                    : null;
-                return (
-                  <Reveal key={r.id} delay={Math.min(index, 6) * 45}>
-                    <article className="search-result">
-                      <div className="search-result__head">
-                        {pct && <span className="search-result__score">匹配 {pct}</span>}
-                        <span className="search-result__id">#{r.id.slice(0, 8)}</span>
-                      </div>
-                      <CipherChip value={r.ciphertext} />
-                      <p className="search-result__content selectable">{r.content}</p>
-                      <div className="search-result__meta">
-                        {new Date(r.created_at).toLocaleString('zh-CN')}
-                      </div>
-                    </article>
-                  </Reveal>
-                );
-              })}
+              {outcome.results.map((r, index) => (
+                <Reveal key={r.id} delay={Math.min(index, 6) * 45}>
+                  <article className="search-result">
+                    <CipherChip value={r.ciphertext} />
+                    <p className="search-result__content selectable">{r.content}</p>
+                    <div className="search-result__meta">
+                      <span className="search-result__id">#{r.id.slice(0, 8)}</span>
+                      <span>{new Date(r.created_at).toLocaleString('zh-CN')}</span>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
             </div>
           )}
         </section>

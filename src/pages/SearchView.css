@@ -85,29 +85,10 @@
   transform: translateY(-2px);
 }
 
-.search-result__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.search-result__score {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0;
-  color: var(--muted);
-  transition: color 180ms ease;
-}
-
-.search-result:hover .search-result__score {
-  color: var(--bg);
-  opacity: 0.72;
-}
-
 .search-result__id {
   font-family: var(--mono);
   font-size: 12px;
+  letter-spacing: 0;
   color: var(--muted);
   transition: color 180ms ease;
 }
@@ -125,6 +106,10 @@
 }
 
 .search-result__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--muted);
