@@ -17,11 +17,12 @@ export function relTime(ts: number): string {
 /**
  * 留言卡片：密文 chip + 内容 + meta。视觉参考 blog_site 的 PostCard
  * （2px 实线边框、悬停反色），但留言卡不可点击跳转。
+ * 在已按密文分组的容器里传 hideChip 省略重复的密文标识。
  */
-export default function NoteCard({ note }: { note: Note }) {
+export default function NoteCard({ note, hideChip = false }: { note: Note; hideChip?: boolean }) {
   return (
     <article className="note-card">
-      <CipherChip value={note.ciphertext} />
+      {!hideChip && <CipherChip value={note.ciphertext} />}
       <p className="note-card__content selectable">{note.content}</p>
       <div className="note-card__meta">
         <span className="note-card__id">#{note.id.slice(0, 8)}</span>
