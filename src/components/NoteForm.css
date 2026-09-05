@@ -32,15 +32,4 @@
 
 .note-form__hint {
   margin-top: 12px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.note-form__hint code {
-  font-family: var(--mono);
-  font-size: 11px;
-  background: var(--border-soft);
-  padding: 2px 8px;
-  border-radius: 6px;
-  word-break: break-all;
 }

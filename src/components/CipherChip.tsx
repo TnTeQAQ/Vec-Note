@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { textHue } from '../lib/color';
 import './CipherChip.css';
 
 async function copyToClipboard(text: string): Promise<void> {
@@ -17,12 +18,15 @@ async function copyToClipboard(text: string): Promise<void> {
   document.body.removeChild(ta);
 }
 
-/** 展示密文（截断）+ 复制按钮；点击复制完整密文。 */
+/**
+ * 密文指纹：前六个字符 + 由密文哈希出的稳定标识色。
+ * 点击胶囊即复制完整密文，悬停反色；无标签、无独立复制按钮。
+ */
 export default function CipherChip({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
+  const hue = textHue(value);
 
-  async function handleCopy(e: React.MouseEvent) {
-    e.stopPropagation();
+  async function handleClick() {
     try {
       await copyToClipboard(value);
       setCopied(true);
@@ -33,12 +37,15 @@ export default function CipherChip({ value }: { value: string }) {
   }
 
   return (
-    <div className="cipher-chip">
-      <span className="cipher-chip__label">密文</span>
-      <code className="cipher-chip__code selectable">{value.slice(0, 22)}…</code>
-      <button type="button" className="cipher-chip__copy" onClick={handleCopy}>
-        {copied ? '已复制' : '复制'}
-      </button>
-    </div>
+    <button
+      type="button"
+      className="cipher-chip"
+      style={{ '--chip-c': `hsl(${hue}, 68%, 46%)` } as React.CSSProperties}
+      onClick={handleClick}
+      title="点击复制完整密文"
+      aria-label="复制完整密文"
+    >
+      {copied ? '已复制' : value.slice(0, 6)}
+    </button>
   );
 }

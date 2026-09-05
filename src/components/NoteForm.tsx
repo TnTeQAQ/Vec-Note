@@ -3,6 +3,7 @@ import { embed } from '../lib/embed';
 import { signTitle } from '../lib/crypto';
 import { createNote } from '../lib/api';
 import Button from './Button';
+import CipherChip from './CipherChip';
 import './NoteForm.css';
 
 /**
@@ -88,9 +89,9 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
 
       {error && <p className="note-form__error">{error}</p>}
       {cipher && (
-        <p className="note-form__hint">
-          已生成密文：<code className="selectable">{cipher.slice(0, 26)}…</code>
-        </p>
+        <div className="note-form__hint">
+          <CipherChip value={cipher} />
+        </div>
       )}
     </form>
   );
