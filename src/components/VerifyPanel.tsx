@@ -49,7 +49,7 @@ export default function VerifyPanel() {
           id="verify-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="请输入手机"
+          placeholder="请输入标题明文"
           autoComplete="off"
         />
         <div className="verify-panel__actions">
