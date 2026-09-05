@@ -8,6 +8,8 @@
   border: 2px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg);
+  /* 裁掉组头悬停底色在圆角处的溢出 */
+  overflow: hidden;
 }
 
 /* 组头：点击折叠/展开（组内的密文胶囊仍可点击复制，事件不冒泡） */
@@ -54,4 +56,9 @@
   gap: 12px;
   padding: 14px 16px 16px;
   border-top: 2px solid var(--border);
+}
+
+/* 组内卡片不做悬停上移，避免压到分组容器的分隔线 */
+.note-group__items .note-card:hover {
+  transform: none;
 }

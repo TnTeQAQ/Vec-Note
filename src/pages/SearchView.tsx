@@ -6,7 +6,7 @@ import NoteGroupList from '../components/NoteGroupList';
 import './SearchView.css';
 
 /**
- * 搜索页：向量召回 Top-10。不做自动验证——用户复制密文到「实验台」自行核查。
+ * 搜索页：向量召回 Top-20。不做自动验证——用户复制密文到「实验台」自行核查。
  * 结果与留言板共用同一套密文分组组件。
  */
 export default function SearchView() {
@@ -43,7 +43,8 @@ export default function SearchView() {
           {outcome.results.length === 0 ? (
             <p className="search__empty">未找到匹配项。</p>
           ) : (
-            <NoteGroupList notes={outcome.results} />
+            /* key 按查询词重挂载：每次新搜索重置折叠状态，避免旧折叠隐藏结果 */
+            <NoteGroupList key={outcome.query} notes={outcome.results} />
           )}
         </section>
       ) : null}
