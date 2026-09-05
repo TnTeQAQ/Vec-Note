@@ -44,12 +44,22 @@ export default function AboutView() {
             「签名置换」（随机置换 + 每维 ±1，正交矩阵）密封向量：
           </p>
           <ul className="about__list">
-            <li>正交变换<strong>精确保持余弦相似度</strong>，「手→手机」命中行为不变；</li>
-            <li>「字符→哈希桶」的位置映射被密钥打乱，无密钥无法从 <code>sealed_vector</code> 反推字符；</li>
-            <li>API 永不返回向量字段。</li>
+            <li>正交变换<strong>精确保持余弦相似度</strong>，密封不改变检索排序；</li>
+            <li>
+              每次嵌入注入相对强度 σ=0.35 的高斯抖动：同一文本两次嵌入的余弦期望 ≈
+              1/(1+σ²) ≈ 89%，同词检索<strong>不会达到 100%</strong>；
+            </li>
+            <li>
+              存储侧按 70% 概率随机保留 n-gram 词项：搜「手」「机」这类子字
+              <strong>有可能命中、也有可能不命中</strong>；
+            </li>
+            <li>无关词只剩噪声级重叠，Worker 按 5% 相似度阈值过滤后不会返回；</li>
+            <li>
+              「字符→哈希桶」的位置映射被密钥打乱，无密钥无法从 <code>sealed_vector</code>{' '}
+              反推字符；API 返回匹配度百分比，但<strong>永不返回向量字段</strong>。
+            </li>
             <li>
               剩余泄漏：可观察到「词项个数/幅度直方图」（≈ 标题规范化后的词项数量级）。
-              如需隐藏长度痕迹，可注入噪声（默认关闭）。
             </li>
           </ul>
         </section>

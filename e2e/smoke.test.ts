@@ -13,6 +13,7 @@ describe('e2e smoke (live wrangler dev)', () => {
       const title = '手机';
       const content = '测试内容';
       const ct = signTitle(title);
+      // 检索模式向量（完整词项 + 抖动）；存储侧的随机丢弃由 UI 在提交时启用
       const vector = embed(title)!;
 
       const home = await fetch(`${BASE}/`);
@@ -38,10 +39,14 @@ describe('e2e smoke (live wrangler dev)', () => {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ ngram_vector: embed('手机')! }),
         })
-      ).json()) as { results: { ciphertext: string; content: string }[] };
+      ).json()) as { results: { ciphertext: string; content: string; similarity?: number }[] };
       expect(exact.results.length).toBeGreaterThan(0);
       expect(exact.results[0].content).toBe(content);
       expect(verifyTitle(exact.results[0].ciphertext, '手机')).toBe(true);
+      // 同词相似度因抖动永不达到 100%，但仍稳定召回
+      expect(typeof exact.results[0].similarity).toBe('number');
+      expect(exact.results[0].similarity!).toBeLessThan(1);
+      expect(exact.results[0].similarity!).toBeGreaterThan(0.5);
 
       const hand = (await (
         await fetch(`${BASE}/api/search`, {
@@ -49,9 +54,11 @@ describe('e2e smoke (live wrangler dev)', () => {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ ngram_vector: embed('手')! }),
         })
-      ).json()) as { results: { ciphertext: string }[] };
+      ).json()) as { results: { ciphertext: string; similarity?: number }[] };
+      // 检索模式存储的向量包含「手」词项 → 必命中，且验签不过（相似候选）
       expect(hand.results.length).toBeGreaterThan(0);
       expect(verifyTitle(hand.results[0].ciphertext, '手')).toBe(false);
+      expect(hand.results[0].similarity!).toBeLessThan(exact.results[0].similarity!);
 
       const phone = (await (
         await fetch(`${BASE}/api/search`, {
@@ -60,6 +67,7 @@ describe('e2e smoke (live wrangler dev)', () => {
           body: JSON.stringify({ ngram_vector: embed('电话')! }),
         })
       ).json()) as { results: unknown[] };
+      // 无共享字符 → 只剩噪声级重叠，低于 5% 阈值 → 无结果
       expect(phone.results.length).toBe(0);
     },
     30000,

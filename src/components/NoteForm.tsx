@@ -23,7 +23,8 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
     setError(null);
     setCipher(null);
 
-    const vector = embed(title);
+    // 存储模式：随机丢弃部分词项，使子字检索呈概率性命中
+    const vector = embed(title, { forStorage: true });
     if (!vector) {
       setError('标题经规范化后为空，请输入有效标题');
       return;
