@@ -142,11 +142,14 @@ async function search(request: Request, env: Env): Promise<Response> {
   }
 
   ranked.sort((a, b) => b.score - a.score);
-  const top = ranked.slice(0, SEARCH_LIMIT).map(({ id, created_at, ciphertext, content }) => ({
+  const top = ranked.slice(0, SEARCH_LIMIT).map(({ id, created_at, ciphertext, content, score }) => ({
     id,
     created_at,
     ciphertext,
     content,
+    // 余弦相似度（0..1）：密封是正交变换、精确保持余弦，前端展示为百分比。
+    // 返回的是分数而非向量本身，sealed_vector 仍然不出服务端。
+    similarity: Number(Math.min(Math.max(score, 0), 1).toFixed(4)),
   }));
   return json({ results: top });
 }

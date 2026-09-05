@@ -34,11 +34,18 @@ export default function SearchView() {
             <div className="search__list">
               {outcome.results.map((r, index) => {
                 const dec = decryptTitle(r.ciphertext, outcome.query);
+                const pct =
+                  typeof r.similarity === 'number'
+                    ? `${(r.similarity * 100).toFixed(1)}%`
+                    : null;
                 return (
                   <Reveal key={r.id} delay={Math.min(index, 6) * 45}>
                     <article className="search-result">
                       <div className="search-result__head">
-                        <Badge ok={dec.ok} label={dec.ok ? `✓ ${dec.label}` : dec.label} />
+                        <div className="search-result__flags">
+                          <Badge ok={dec.ok} label={dec.ok ? `✓ ${dec.label}` : dec.label} />
+                          {pct && <span className="search-result__score">匹配 {pct}</span>}
+                        </div>
                         <span className="search-result__id">#{r.id.slice(0, 8)}</span>
                       </div>
                       <CipherChip value={r.ciphertext} />

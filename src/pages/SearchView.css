@@ -66,6 +66,26 @@
   gap: 12px;
 }
 
+.search-result__flags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-result__score {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--muted);
+  transition: color 180ms ease;
+}
+
+.search-result:hover .search-result__score {
+  color: var(--bg);
+  opacity: 0.72;
+}
+
 .search-result__id {
   font-family: var(--mono);
   font-size: 12px;

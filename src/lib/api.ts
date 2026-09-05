@@ -5,7 +5,10 @@ export interface Note {
   content: string;
 }
 
-export type SearchResult = Note;
+export interface SearchResult extends Note {
+  /** 余弦相似度（0..1）；仅 /api/search 返回，UI 展示为百分比 */
+  similarity?: number;
+}
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
