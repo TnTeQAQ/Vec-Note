@@ -23,10 +23,10 @@ export default function NoteGroupList({ notes }: { notes: Note[] }) {
       list.push(note);
       byCipher.set(note.ciphertext, list);
     }
-    // 组内按创建时间先后排序（早 → 晚）
+    // 组内最新在前（最早发的在最下面）
     return [...byCipher.entries()].map(([ciphertext, items]) => ({
       ciphertext,
-      items: items.sort((a, b) => a.created_at - b.created_at),
+      items: items.sort((a, b) => b.created_at - a.created_at),
     }));
   }, [notes]);
 
