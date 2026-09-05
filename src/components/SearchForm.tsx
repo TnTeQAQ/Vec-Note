@@ -45,7 +45,7 @@ export default function SearchForm({ onResults }: { onResults: (o: SearchOutcome
           className="field search-form__input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索（如：手机 / 手）"
+          placeholder="请输入搜索词"
           autoComplete="off"
         />
         <Button type="submit" variant="solid" size="md" disabled={loading || !query.trim()}>

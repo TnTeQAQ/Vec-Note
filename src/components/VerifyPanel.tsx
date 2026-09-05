@@ -38,7 +38,7 @@ export default function VerifyPanel() {
           id="verify-cipher"
           value={cipher}
           onChange={(e) => setCipher(e.target.value)}
-          placeholder="粘贴复制的密文"
+          placeholder="请输入密文"
           autoComplete="off"
         />
         <label className="field-label" htmlFor="verify-title">
@@ -49,7 +49,7 @@ export default function VerifyPanel() {
           id="verify-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="例如：手机"
+          placeholder="请输入手机"
           autoComplete="off"
         />
         <div className="verify-panel__actions">

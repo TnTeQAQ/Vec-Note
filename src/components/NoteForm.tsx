@@ -61,7 +61,7 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
         id="note-title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="例如：手机"
+        placeholder="请输入手机"
         autoComplete="off"
       />
 
@@ -73,7 +73,7 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
         id="note-content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="例如：测试内容"
+        placeholder="请输入测试内容"
         rows={4}
       />
 
