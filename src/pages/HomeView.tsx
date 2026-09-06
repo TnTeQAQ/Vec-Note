@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import Lenis from 'lenis';
+import Snap from 'lenis/snap';
+import type { EasingFunction } from 'lenis';
 import { listNotes, type Note } from '../lib/api';
 import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
@@ -8,11 +11,13 @@ import NoteCard from '../components/NoteCard';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import './HomeView.css';
 
+const easeOut: EasingFunction = (t: number) => 1 - Math.pow(1 - t, 3);
+
 /**
  * 论坛式主页，双屏结构：
  * - 第一屏（100svh 居中）：搜索框 + 发布入口；
- * - 第二屏：留言流（按时间排序）。
- * 滚轮一档在两屏之间平滑滑动（参考 blog_site 首页），搜索提交后自动滑到结果。
+ * - 第二屏：最新留言流（按时间排序）。
+ * 滚轮翻屏由 Lenis + Snap('lock') 库驱动，不手写动画。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -21,7 +26,9 @@ export default function HomeView() {
   const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
   const startReveal = usePageReveal();
   const reduced = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
   const boardRef = useRef<HTMLElement>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -43,84 +50,24 @@ export default function HomeView() {
     };
   }, []);
 
-    // 滚轮：搜索屏 ↔ 留言屏。
-  // 只在「停顿后重新开始的手势」里滑屏；滑动中同向滚动立即取消滑屏交给原生，
-  // 连续向下滚动不吞输入、不停顿；反方向滚动则从当前位置立刻反向，来回丝滑。
+  // 滚轮翻屏：交给成熟库 Lenis(smooth) + Snap(type:'lock')。
+  // 搜索屏向下一滚自动滑到「最新留言」，留言区顶部向上一滚滑回搜索框；
+  // 吸附动画期间锁定输入防抖动，留言区深处自由滚动不受打扰。
   useEffect(() => {
-    if (reduced) return; // 减弱动效：交给原生滚动
-
-    let raf = 0;
-    let active = false;
-    let from = 0;
-    let to = 0;
-    let t0 = 0;
-    let lastWheel = 0; // 上一个滚轮事件的时刻（0 = 从未滚过）
-    const DURATION = 360;
-
-    const boardTop = () => {
-      const el = boardRef.current;
-      return el ? el.getBoundingClientRect().top + window.scrollY - 20 : window.innerHeight - 20;
-    };
-
-    const cancel = () => {
-      cancelAnimationFrame(raf);
-      active = false;
-    };
-
-    const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / DURATION);
-      const e = 1 - Math.pow(1 - t, 3); // easeOutCubic：起步快，不显停顿
-      window.scrollTo(0, from + (to - from) * e);
-      if (t < 1) raf = requestAnimationFrame(step);
-      else active = false;
-    };
-
-    const glide = (next: number) => {
-      from = window.scrollY;
-      to = next;
-      t0 = performance.now();
-      cancel();
-      active = true;
-      raf = requestAnimationFrame(step);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      const now = performance.now();
-      const idle = now - lastWheel; // 距上一个滚轮事件的间隔
-      lastWheel = now;
-
-      const y = window.scrollY;
-      const vh = window.innerHeight;
-      const atSearch = y < vh * 0.5;
-      const down = event.deltaY > 0;
-
-      if (active) {
-        if (down === to > from) {
-          // 同向持续滚动：取消滑屏、不拦截本档 → 原生无缝续滚，输入不吞
-          cancel();
-          return;
-        }
-        // 反向滚动：从当前位置立刻反向
-        event.preventDefault();
-        glide(down ? boardTop() : 0);
-        return;
-      }
-
-      // 仅「停顿 500ms 后的新手势」才滑屏；连续滚动交给原生，绝不卡顿
-      if (idle < 500) return;
-      if (down && atSearch) {
-        event.preventDefault();
-        glide(boardTop());
-      } else if (!down && !atSearch && y < vh * 1.3) {
-        event.preventDefault();
-        glide(0);
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
+    if (reduced) return; // 减弱动效：完全原生滚动
+    const lenis = new Lenis({ autoRaf: true });
+    const snap = new Snap(lenis, {
+      type: 'lock',
+      duration: 0.85,
+      easing: easeOut,
+    });
+    if (heroRef.current) snap.addElement(heroRef.current);
+    if (boardRef.current) snap.addElement(boardRef.current);
+    lenisRef.current = lenis;
     return () => {
-      window.removeEventListener('wheel', onWheel);
-      cancelAnimationFrame(raf);
+      lenisRef.current = null;
+      snap.destroy();
+      lenis.destroy();
     };
   }, [reduced]);
 
@@ -132,17 +79,18 @@ export default function HomeView() {
 
   const handleResults = (o: SearchOutcome | null) => {
     setOutcome(o);
-    if (o) {
-      // 提交搜索后直接滑到结果区
-      requestAnimationFrame(() => {
-        const el = boardRef.current;
-        if (!el) return;
-        window.scrollTo({
-          top: el.getBoundingClientRect().top + window.scrollY - 20,
-          behavior: reduced ? 'auto' : 'smooth',
-        });
-      });
-    }
+    if (!o) return;
+    // 提交搜索后直接滑到结果区
+    requestAnimationFrame(() => {
+      const el = boardRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 20;
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(top, { duration: 0.8, easing: easeOut });
+      } else {
+        window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+      }
+    });
   };
 
   const cards = (list: Note[]) => (
@@ -157,7 +105,7 @@ export default function HomeView() {
 
   return (
     <div className="home">
-      <section className="home__hero">
+      <section className="home__hero" ref={heroRef}>
         <div className="home__hero-inner">
           <Reveal>
             <h1 className="home__title">Vec-Note</h1>

@@ -66,6 +66,16 @@ body {
   transition: background-color 320ms ease, color 320ms ease;
 }
 
+/* Lenis smooth scroll 推荐的基础样式 */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
 #root {
   min-height: 100svh;
   width: 100%;
