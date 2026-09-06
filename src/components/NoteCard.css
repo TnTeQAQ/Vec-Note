@@ -57,6 +57,27 @@
   color: var(--fg);
 }
 
+/* 管理模式下的删除入口（危险色） */
+.note__delete {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--danger);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+
+.note__delete:hover {
+  color: var(--fg);
+}
+
 /* 列表内的内容预览：限高 4 行，过长即截断 */
 .note__content {
   position: relative;

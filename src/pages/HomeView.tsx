@@ -9,6 +9,8 @@ import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
 import NoteCard from '../components/NoteCard';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useAdmin } from '../components/AdminProvider';
+import { useToast } from '../components/Toast';
 import './HomeView.css';
 
 /** 每页条数 */
@@ -19,6 +21,7 @@ const PAGE_SIZE = 10;
  * - 第一屏（#top）：搜索框 + 发布入口（弹窗表单）；
  * - 第二屏（#notes）：最新留言流 / 搜索结果。
  * 跳转用原生 # 锚点 + 浏览器平滑滚动；列表向下滚动时自动加载下一页。
+ * 管理模式（登录后）：卡片显示删除入口，确认后从当前列表/搜索结果移除。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,6 +31,12 @@ export default function HomeView() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
+  const { isAdmin, deleteNote } = useAdmin();
+  const { toast } = useToast();
+
+  // 删除确认
+  const [deleting, setDeleting] = useState<Note | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const reduced = useReducedMotion();
   const startReveal = usePageReveal();
   const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
@@ -147,6 +156,51 @@ export default function HomeView() {
     requestAnimationFrame(() => scrollToId('notes'));
   };
 
+  const closeDelete = () => {
+    if (deleteBusy) return;
+    setDeleting(null);
+  };
+
+  /** 本地同步删除：列表过滤 + 偏移修正；搜索结果同步 total */
+  const applyDeleteLocal = (id: string) => {
+    const wasListed = notes.some((n) => n.id === id);
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    if (wasListed) offsetRef.current = Math.max(0, offsetRef.current - 1);
+    setSearch((prev) => {
+      if (!prev) return prev;
+      const results = prev.results.filter((r) => r.id !== id);
+      return prev.results.length === results.length
+        ? prev
+        : { ...prev, results, total: Math.max(0, prev.total - 1) };
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleting || deleteBusy) return;
+    setDeleteBusy(true);
+    const id = deleting.id;
+    try {
+      await deleteNote(id);
+      applyDeleteLocal(id);
+      setDeleting(null);
+      toast('留言已删除', 'success');
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      if (status === 404) {
+        // 服务端已不存在（如已在别处删除）→ 本地同步移除
+        applyDeleteLocal(id);
+        toast('该留言已不存在', 'info');
+      } else if (status === 401) {
+        toast('登录已过期，请重新进入管理', 'error');
+      } else {
+        toast(err instanceof Error ? err.message : String(err), 'error');
+      }
+      setDeleting(null);
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
   const goAbout = (e: React.MouseEvent<HTMLElement>) => {
     if (!isPlainClick(e)) return;
     e.preventDefault();
@@ -157,7 +211,7 @@ export default function HomeView() {
     <div className="home__cards">
       {list.map((note, index) => (
         <Reveal key={note.id} delay={Math.min(index, 6) * 24}>
-          <NoteCard note={note} verify />
+          <NoteCard note={note} verify admin={isAdmin} onDelete={setDeleting} />
         </Reveal>
       ))}
     </div>
@@ -235,6 +289,22 @@ export default function HomeView() {
 
       <Modal open={composing} title="发布留言" onClose={() => setComposing(false)}>
         <NoteForm bare onCreated={handleCreated} />
+      </Modal>
+
+      <Modal open={deleting !== null} title="删除留言" onClose={closeDelete}>
+        {deleting ? (
+          <div className="home__delete">
+            <p className="home__delete-msg">确定删除这条留言？此操作不可恢复。</p>
+            <div className="home__delete-actions">
+              <Button variant="ghost" onClick={closeDelete} disabled={deleteBusy}>
+                取消
+              </Button>
+              <Button variant="solid" className="home__delete-confirm" onClick={confirmDelete} disabled={deleteBusy}>
+                {deleteBusy ? '删除中…' : '确认删除'}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </Modal>
     </div>
   );

@@ -10,10 +10,13 @@ export interface SearchResult extends Note {
   similarity?: number;
 }
 
-async function post<T>(path: string, body: unknown): Promise<T> {
+async function post<T>(path: string, body: unknown, token?: string): Promise<T> {
   const res = await fetch(path, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
@@ -53,4 +56,45 @@ export function searchNotes(
     offset,
     limit,
   });
+}
+
+// ---- 隐藏管理入口 ----
+
+export interface AdminSession {
+  token: string;
+  expires_at: number;
+}
+
+/** 密码登录（默认密码 admin），成功返回会话 token。 */
+export function adminLogin(password: string): Promise<AdminSession> {
+  return post<AdminSession>('/api/admin/login', { password });
+}
+
+/** 退出管理（使当前 token 失效）。 */
+export function adminLogout(token: string): Promise<{ ok: boolean }> {
+  return post<{ ok: boolean }>('/api/admin/logout', {}, token);
+}
+
+/** 修改管理密码：需当前密码 + 新密码，使用登录后的 token 鉴权。 */
+export function adminChangePassword(
+  token: string,
+  current_password: string,
+  new_password: string,
+): Promise<{ ok: boolean }> {
+  return post<{ ok: boolean }>('/api/admin/password', { current_password, new_password }, token);
+}
+
+/** 管理员删除一条留言。 */
+export async function adminDeleteNote(token: string, id: string): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/notes/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { authorization: `Bearer ${token}` },
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    const err = new Error(typeof data.error === 'string' ? data.error : `HTTP ${res.status}`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean };
 }

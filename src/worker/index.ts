@@ -6,6 +6,12 @@ import {
   SIMILARITY_EPSILON,
 } from '../shared/constants';
 import { makeSealKey, seal, type SealKey } from './seal';
+import {
+  loginAdmin,
+  logoutAdmin,
+  changeAdminPassword,
+  deleteNoteAsAdmin,
+} from './admin';
 
 interface Env {
   DB: D1Database;
@@ -202,9 +208,23 @@ async function search(request: Request, env: Env): Promise<Response> {
 
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   const p = url.pathname;
+
+  // 隐藏管理入口
+  if (p === '/api/admin/login' && request.method === 'POST') return loginAdmin(request, env);
+  if (p === '/api/admin/logout' && request.method === 'POST') return logoutAdmin(request, env);
+  if (p === '/api/admin/password' && request.method === 'POST') {
+    return changeAdminPassword(request, env);
+  }
+
   if (p === '/api/notes' && request.method === 'POST') return createNote(request, env);
   if (p === '/api/notes' && request.method === 'GET') return listNotes(request, env, url);
   if (p === '/api/search' && request.method === 'POST') return search(request, env);
+
+  // 留言详情操作（仅管理员删除）
+  const noteMatch = /^\/api\/notes\/([^/]+)$/.exec(p);
+  if (noteMatch && request.method === 'DELETE') {
+    return deleteNoteAsAdmin(request, env, noteMatch[1]);
+  }
   return json({ error: 'not found' }, 404);
 }
 

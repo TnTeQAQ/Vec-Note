@@ -15,11 +15,25 @@
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
+/* 长按检测：按住期间屏蔽系统触摸手势/文本选择/右键菜单 */
+.theme-toggle {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .theme-toggle:hover,
 .fab-round:hover {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
+}
+
+/* 管理模式浮标：登录后显示，锁定图标微调 */
+.admin-fab svg {
+  width: 17px;
+  height: 17px;
 }
 
 /* 右下角悬浮操作组（回到顶部 + 主题切换，同款圆形按钮） */

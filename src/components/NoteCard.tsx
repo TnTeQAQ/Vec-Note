@@ -23,8 +23,19 @@ export function relTime(ts: number): string {
  * 留言条目（留言板风格）：指纹 + ID / 去验证 / 时间一行头，内容随下，
  * 行与行之间用细分隔线。内容渲染为净化后的 Markdown；
  * 过长时在列表里截断，点「查看全文」在弹窗里看完整内容。
+ * admin：管理模式（登录后），显示删除入口。
  */
-export default function NoteCard({ note, verify = false }: { note: Note; verify?: boolean }) {
+export default function NoteCard({
+  note,
+  verify = false,
+  admin = false,
+  onDelete,
+}: {
+  note: Note;
+  verify?: boolean;
+  admin?: boolean;
+  onDelete?: (note: Note) => void;
+}) {
   const startReveal = usePageReveal();
   const [openDetail, setOpenDetail] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -56,6 +67,11 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
         {verify && (
           <button type="button" className="note__verify" onClick={goVerify}>
             去验证
+          </button>
+        )}
+        {admin && onDelete && (
+          <button type="button" className="note__delete" onClick={() => onDelete(note)}>
+            删除
           </button>
         )}
         <span className="note__time">{relTime(note.created_at)}</span>

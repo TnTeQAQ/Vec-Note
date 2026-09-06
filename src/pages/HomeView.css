@@ -149,3 +149,34 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+.home__delete-msg {
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+
+.home__delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* 删除确认按钮：危险色实心 */
+.home__delete-confirm {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+  color: #fff !important;
+}
+
+.home__delete-confirm:hover {
+  background: var(--fg) !important;
+  border-color: var(--fg) !important;
+  color: var(--bg) !important;
+}
+
+.home__delete-confirm:disabled {
+  background: var(--border-soft) !important;
+  border-color: var(--border-soft) !important;
+  color: var(--muted) !important;
+}

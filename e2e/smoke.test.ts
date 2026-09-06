@@ -72,4 +72,79 @@ describe('e2e smoke (live wrangler dev)', () => {
     },
     30000,
   );
+
+  it(
+    'admin: 登录(admin) → 删除留言 → 改密并复原 → 登出后 token 失效',
+    async () => {
+      const login = (password: string) =>
+        fetch(`${BASE}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+      const auth = (token: string) => ({ authorization: `Bearer ${token}` });
+
+      // 错误密码 → 401
+      expect((await login('wrong-password')).status).toBe(401);
+
+      // 默认密码 admin 登录
+      const okLogin = await login('admin');
+      expect(okLogin.status).toBe(200);
+      const { token } = (await okLogin.json()) as { token: string };
+      expect(typeof token).toBe('string');
+
+      // 删除留言：删掉上一个用例创建的那条（内容 测试内容）
+      const { notes } = (await (await fetch(`${BASE}/api/notes?limit=100`)).json()) as {
+        notes: { id: string; content: string }[];
+      };
+      const target = notes.find((n) => n.content === '测试内容');
+      expect(target).toBeTruthy();
+      const delRes = await fetch(`${BASE}/api/notes/${target!.id}`, {
+        method: 'DELETE',
+        headers: auth(token),
+      });
+      expect(delRes.status).toBe(200);
+      const after = (await (await fetch(`${BASE}/api/notes?limit=100`)).json()) as {
+        notes: { id: string }[];
+      };
+      expect(after.notes.some((n) => n.id === target!.id)).toBe(false);
+
+      // 修改密码 → 旧密码失效 → 新密码可用 → 复原为 admin
+      const TEMP = 'e2e-temp-password';
+      const change = await fetch(`${BASE}/api/admin/password`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...auth(token) },
+        body: JSON.stringify({ current_password: 'admin', new_password: TEMP }),
+      });
+      expect(change.status).toBe(200);
+      expect((await login('admin')).status).toBe(401);
+      expect((await login(TEMP)).status).toBe(200);
+      const relogin = await fetch(`${BASE}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ password: TEMP }),
+      });
+      const { token: token2 } = (await relogin.json()) as { token: string };
+      const restore = await fetch(`${BASE}/api/admin/password`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...auth(token2) },
+        body: JSON.stringify({ current_password: TEMP, new_password: 'admin' }),
+      });
+      expect(restore.status).toBe(200);
+
+      // 登出 → 原 token 失效（受保护接口返回 401）
+      const logout = await fetch(`${BASE}/api/admin/logout`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...auth(token2) },
+        body: '{}',
+      });
+      expect(logout.status).toBe(200);
+      const stale = await fetch(`${BASE}/api/notes/does-not-exist`, {
+        method: 'DELETE',
+        headers: auth(token2),
+      });
+      expect(stale.status).toBe(401);
+    },
+    30000,
+  );
 });

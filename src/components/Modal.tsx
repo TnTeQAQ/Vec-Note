@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
 
 export default function Modal({
@@ -40,7 +41,9 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
+  // portal 到 body：留言卡等含 content-visibility/transform 的容器会把
+  // position: fixed 的弹窗“关”在容器内，导致弹窗显示在卡片框里而非网页层。
+  return createPortal(
     <div
       className="modal"
       onMouseDown={(e) => {
@@ -64,6 +67,7 @@ export default function Modal({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
