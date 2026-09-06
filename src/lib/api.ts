@@ -26,10 +26,15 @@ export function createNote(content: string, ngram_vector: number[], title_ct: st
   return post<Note>('/api/notes', { content, ngram_vector, title_ct });
 }
 
-export async function listNotes(limit = 20): Promise<{ notes: Note[] }> {
-  const res = await fetch(`/api/notes?limit=${limit}`);
+/** 最近留言（分页）：limit 每页条数、offset 偏移；hasMore 表示是否还有下一页。 */
+export async function listNotes(
+  limit = 20,
+  offset = 0,
+): Promise<{ notes: Note[]; hasMore: boolean }> {
+  const res = await fetch(`/api/notes?limit=${limit}&offset=${offset}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json()) as { notes: Note[] };
+  const data = (await res.json()) as { notes: Note[]; hasMore?: boolean };
+  return { notes: data.notes, hasMore: data.hasMore ?? false };
 }
 
 export function searchNotes(ngram_vector: number[]): Promise<{ results: SearchResult[] }> {

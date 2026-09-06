@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import Lenis from 'lenis';
 import type { EasingFunction } from 'lenis';
 import { listNotes, type Note } from '../lib/api';
@@ -23,18 +24,23 @@ const GLIDE_SECONDS = 0.6;
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
   const reduced = useReducedMotion();
   const boardRef = useRef<HTMLElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
 
   const load = useCallback(async () => {
     try {
-      const { notes } = await listNotes(20);
+      const { notes, hasMore } = await listNotes(20, 0);
+      offsetRef.current = notes.length;
       setNotes(notes);
+      setHasMore(hasMore);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -46,6 +52,33 @@ export default function HomeView() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // 无限滚动：哨兵进入视口（提前 600px）→ 加载下一页
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const { notes: page, hasMore: more } = await listNotes(20, offsetRef.current);
+      offsetRef.current += page.length;
+      setNotes((prev) => [...prev, ...page]);
+      setHasMore(more);
+      // 页面变长后刷新 Lenis 可滚动上限
+      lenisRef.current?.resize();
+    } catch {
+      // 下一页加载失败：静默，继续滚动会再次触发重试
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore]);
+
+  const { ref: sentinelRef, inView: sentinelInView } = useInView({
+    rootMargin: '600px 0px',
+  });
+
+  useEffect(() => {
+    if (outcome || !sentinelInView || loadingMore || !hasMore) return;
+    void loadMore();
+  }, [sentinelInView, loadingMore, hasMore, outcome, loadMore]);
 
   // 滑到「最新留言」区顶部（着陆点留 20px 余量）
   const glideToBoard = useCallback(() => {
@@ -162,7 +195,13 @@ export default function HomeView() {
         ) : notes.length === 0 ? (
           <p className="home__empty">暂无留言，点「发布留言」写下第一条吧。</p>
         ) : (
-          cards(notes)
+          <>
+            {cards(notes)}
+            {/* 无限滚动哨兵：滚到底附近自动加载下一页 */}
+            <div ref={sentinelRef} className="home__more">
+              {loadingMore ? <span className="home__more-text">加载中…</span> : null}
+            </div>
+          </>
         )}
       </section>
 

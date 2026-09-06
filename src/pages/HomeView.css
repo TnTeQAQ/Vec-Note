@@ -127,6 +127,18 @@
   color: var(--muted);
 }
 
+.home__more {
+  padding: 6px 0 2px;
+  text-align: center;
+}
+
+.home__more-text {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .home__error {
   color: var(--danger);
   font-size: 14px;

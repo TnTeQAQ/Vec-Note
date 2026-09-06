@@ -22,7 +22,8 @@
     "@noble/hashes": "^2.4.0",
     "lenis": "^1.3.26",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-intersection-observer": "^11.0.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260904.1",

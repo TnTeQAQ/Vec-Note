@@ -78,24 +78,31 @@ async function createNote(request: Request, env: Env): Promise<Response> {
 }
 
 async function listNotes(_request: Request, env: Env, url: URL): Promise<Response> {
-  const raw = url.searchParams.get('limit');
-  let limit = Number.parseInt(raw ?? '20', 10);
+  const rawLimit = url.searchParams.get('limit');
+  let limit = Number.parseInt(rawLimit ?? '20', 10);
   if (!Number.isFinite(limit) || limit < 1) limit = LIST_LIMIT;
   limit = Math.min(limit, 100);
 
+  const rawOffset = url.searchParams.get('offset');
+  let offset = Number.parseInt(rawOffset ?? '0', 10);
+  if (!Number.isFinite(offset) || offset < 0) offset = 0;
+
+  // 多取一行判断是否还有下一页（hasMore）
   const { results } = await env.DB.prepare(
-    'SELECT id, created_at, content, title_ct FROM notes ORDER BY created_at DESC LIMIT ?',
+    'SELECT id, created_at, content, title_ct FROM notes ORDER BY created_at DESC LIMIT ? OFFSET ?',
   )
-    .bind(limit)
+    .bind(limit + 1, offset)
     .all<{ id: string; created_at: number; content: string; title_ct: string }>();
 
-  const notes = (results ?? []).map((r) => ({
+  const rows = results ?? [];
+  const hasMore = rows.length > limit;
+  const notes = rows.slice(0, limit).map((r) => ({
     id: r.id,
     created_at: r.created_at,
     ciphertext: r.title_ct,
     content: r.content,
   }));
-  return json({ notes });
+  return json({ notes, hasMore });
 }
 
 async function search(request: Request, env: Env): Promise<Response> {
