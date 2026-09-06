@@ -4,6 +4,7 @@ import Modal from './Modal';
 import RichText from './RichText';
 import { usePageReveal } from './page-reveal-context';
 import { stageVerifyCipher } from '../lib/verify-handoff';
+import { renderRichText } from '../lib/rich';
 import type { Note } from '../lib/api';
 import './NoteCard.css';
 
@@ -27,8 +28,34 @@ export function relTime(ts: number): string {
 export default function NoteCard({ note, verify = false }: { note: Note; verify?: boolean }) {
   const startReveal = usePageReveal();
   const [openDetail, setOpenDetail] = useState(false);
+  const [copiedDetail, setCopiedDetail] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
+
+  // 复制留言纯文本（剥离 Markdown 标记与样式标签）
+  async function copyContent() {
+    const holder = document.createElement('div');
+    holder.innerHTML = renderRichText(note.content);
+    const text = (holder.textContent ?? '').trim();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopiedDetail(true);
+      window.setTimeout(() => setCopiedDetail(false), 1200);
+    } catch {
+      /* 剪贴板不可用则静默失败 */
+    }
+  }
 
   // 内容超过截断高度时显示「查看全文」
   useEffect(() => {
@@ -85,6 +112,11 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
             </span>
           </div>
           <RichText markdown={note.content} />
+          <div className="note-detail__actions">
+            <button type="button" className="note-detail__copy" onClick={copyContent}>
+              {copiedDetail ? '已复制' : '复制留言'}
+            </button>
+          </div>
         </div>
       </Modal>
     </article>
