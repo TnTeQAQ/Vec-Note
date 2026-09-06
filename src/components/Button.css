@@ -17,14 +17,17 @@
   transform: scale(var(--btn-scale, 1));
 }
 
+/* 禁用态：低对比「描边灰」——透明底 + 柔和边框 + muted 文字。
+   颜色取自 --border-soft/--muted（两种主题已各自调好），
+   避免亮色背景的灰块与暗色背景的泥巴灰。 */
 .btn:disabled {
-  opacity: 1; /* 不透明：灰底灰字，而非半透明 */
+  opacity: 1;
   cursor: not-allowed;
   transform: none;
-  color: color-mix(in srgb, var(--fg) 45%, var(--bg));
-  background: color-mix(in srgb, var(--fg) 12%, var(--bg));
-  border-color: color-mix(in srgb, var(--fg) 18%, var(--bg));
   box-shadow: none;
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--border-soft);
 }
 
 .btn--sm {
