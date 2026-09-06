@@ -43,49 +43,70 @@ export default function HomeView() {
     };
   }, []);
 
-  // 滚轮一档：搜索屏 ↔ 留言屏 互相滑动（键盘/触屏滚动不受影响）。
-  // 自绘 rAF 缓动：时长可控、锁定期与动画等长，连续滚动也能即时响应。
+  // 滚轮一档：搜索屏 ↔ 留言屏。无锁、可瞬时反向——任何方向的滚轮立即响应，
+  // 动画中反方向滚动会从当前位置立刻反向，来回切换始终丝滑。
   useEffect(() => {
-    let lockUntil = 0;
+    if (reduced) return; // 减弱动效：交给原生滚动
+
     let raf = 0;
-    const glide = (to: number) => {
+    let active = false;
+    let from = 0;
+    let to = 0;
+    let t0 = 0;
+    const DURATION = 420;
+
+    const boardTop = () => {
+      const el = boardRef.current;
+      return el ? el.getBoundingClientRect().top + window.scrollY - 20 : window.innerHeight - 20;
+    };
+
+    const clear = () => {
       cancelAnimationFrame(raf);
-      const from = window.scrollY;
-      const duration = reduced ? 0 : 650;
-      lockUntil = performance.now() + duration + 120;
-      if (duration === 0) {
-        window.scrollTo(0, to);
-        return;
-      }
-      const start = performance.now();
-      const step = (now: number) => {
-        const t = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-        window.scrollTo(0, from + (to - from) * eased);
-        if (t < 1) raf = requestAnimationFrame(step);
-      };
+      active = false;
+    };
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / DURATION);
+      // easeInOutQuad
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      window.scrollTo(0, from + (to - from) * e);
+      if (t < 1) raf = requestAnimationFrame(step);
+      else active = false;
+    };
+
+    const glide = (next: number) => {
+      from = window.scrollY;
+      to = next;
+      t0 = performance.now();
+      clear();
+      active = true;
       raf = requestAnimationFrame(step);
     };
+
     const onWheel = (event: WheelEvent) => {
-      if (performance.now() < lockUntil) {
-        // 滑动进行中：吞掉后续滚轮事件，避免惯性打断动画
-        event.preventDefault();
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      const atSearch = y < vh * 0.5;
+      const down = event.deltaY > 0;
+
+      if (!active) {
+        if (down && atSearch) {
+          event.preventDefault();
+          glide(boardTop());
+        } else if (!down && !atSearch && y < vh * 1.3) {
+          // 留言区顶部往上滚 → 回搜索屏；更深处原生滚动
+          event.preventDefault();
+          glide(0);
+        }
         return;
       }
-      const vh = window.innerHeight;
-      const y = window.scrollY;
-      if (event.deltaY > 0 && y < vh * 0.5) {
-        // 搜索屏：下滑 → 滑到留言区（着陆点高出区块 20px，不顶死）
-        event.preventDefault();
-        const el = boardRef.current;
-        glide(el ? el.getBoundingClientRect().top + y - 20 : vh - 20);
-      } else if (event.deltaY < 0 && y > vh * 0.5 && y < vh * 1.3) {
-        // 留言区顶部：上滑 → 回到搜索屏
-        event.preventDefault();
-        glide(0);
+      // 动画中：反向滚轮立即反向，同向吞掉保持连贯
+      event.preventDefault();
+      if (down !== to > from) {
+        glide(down ? boardTop() : 0);
       }
-      // 留言区深处交给浏览器原生滚动
     };
+
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       window.removeEventListener('wheel', onWheel);
