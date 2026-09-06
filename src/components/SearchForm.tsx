@@ -6,10 +6,14 @@ import './SearchForm.css';
 
 export type SearchOutcome = {
   query: string;
+  /** 查询向量（分页翻页时复用同一向量，保证排序一致、无重复/跳漏） */
+  vector: number[];
   results: SearchResult[];
+  total: number;
+  hasMore: boolean;
 };
 
-/** 搜索表单：查询词本地向量化后交 Worker 密封召回。结果由调用方渲染。 */
+/** 搜索表单：查询词本地向量化后交 Worker 密封召回第一页。结果由调用方渲染并分页续载。 */
 export default function SearchForm({ onResults }: { onResults: (o: SearchOutcome | null) => void }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,8 +33,8 @@ export default function SearchForm({ onResults }: { onResults: (o: SearchOutcome
 
     setLoading(true);
     try {
-      const { results } = await searchNotes(vector);
-      onResults({ query: q, results });
+      const { results, total, hasMore } = await searchNotes(vector, 0);
+      onResults({ query: q, vector, results, total, hasMore });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

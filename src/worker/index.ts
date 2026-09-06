@@ -117,11 +117,20 @@ async function search(request: Request, env: Env): Promise<Response> {
 
   const q = seal(vec, sealKey(env));
   const qNorm = Math.sqrt(dot(q, q));
-  if (qNorm === 0) return json({ results: [] });
+  if (qNorm === 0) return json({ results: [], total: 0, hasMore: false });
 
   const { results } = await env.DB.prepare(
     'SELECT id, created_at, content, title_ct, sealed_vector FROM notes',
   ).all<{ id: string; created_at: number; content: string; title_ct: string; sealed_vector: string }>();
+
+  // 请求内分页参数（默认每页 20）
+  const rawLimit = typeof body.limit === 'number' ? body.limit : 20;
+  let limit = Math.floor(rawLimit);
+  if (!Number.isFinite(limit) || limit < 1) limit = 20;
+  limit = Math.min(limit, 100);
+  const rawOffset = typeof body.offset === 'number' ? body.offset : 0;
+  let offset = Math.floor(rawOffset);
+  if (!Number.isFinite(offset) || offset < 0) offset = 0;
 
   const ranked: Array<{ id: string; created_at: number; ciphertext: string; content: string; score: number }> = [];
   for (const r of results ?? []) {
@@ -148,9 +157,9 @@ async function search(request: Request, env: Env): Promise<Response> {
   }
 
   ranked.sort((a, b) => b.score - a.score);
-  // 返回全部高于阈值的匹配（按相似度排序）；不做条数截断，
-  // 否则库内匹配量超过固定上限时，靠后的留言会永远搜不到。
-  const top = ranked.map(({ id, created_at, ciphertext, content, score }) => ({
+  // 总命中数 = 高于阈值且排序后的全部结果；接口按 offset/limit 分页返回。
+  const total = ranked.length;
+  const page = ranked.slice(offset, offset + limit).map(({ id, created_at, ciphertext, content, score }) => ({
     id,
     created_at,
     ciphertext,
@@ -159,7 +168,7 @@ async function search(request: Request, env: Env): Promise<Response> {
     // 返回的是分数而非向量本身，sealed_vector 仍然不出服务端。
     similarity: Number(Math.min(Math.max(score, 0), 1).toFixed(4)),
   }));
-  return json({ results: top });
+  return json({ results: page, total, hasMore: offset + page.length < total });
 }
 
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {

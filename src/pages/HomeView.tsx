@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import Lenis from 'lenis';
 import type { EasingFunction } from 'lenis';
-import { listNotes, type Note } from '../lib/api';
+import { listNotes, searchNotes, type Note } from '../lib/api';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import NoteForm from '../components/NoteForm';
@@ -15,12 +15,14 @@ import './HomeView.css';
 const easeOut: EasingFunction = (t: number) => 1 - Math.pow(1 - t, 3);
 /** 翻屏动画时长（秒）：稍快但仍平滑 */
 const GLIDE_SECONDS = 0.6;
+/** 每页条数 */
+const PAGE_SIZE = 20;
 
 /**
  * 论坛式主页，双屏结构：
  * - 第一屏（100svh 居中）：搜索框 + 发布入口（弹窗表单）；
- * - 第二屏：最新留言流（按时间排序）。
- * 滚轮翻屏由 Lenis 平滑驱动，发布留言不跳页、用弹窗完成。
+ * - 第二屏：最新留言流（按时间排序）或搜索结果——两者都支持
+ *   向下滚动动态加载下一页（react-intersection-observer 哨兵）。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,7 +30,7 @@ export default function HomeView() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
+  const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
   const reduced = useReducedMotion();
   const boardRef = useRef<HTMLElement>(null);
@@ -37,7 +39,7 @@ export default function HomeView() {
 
   const load = useCallback(async () => {
     try {
-      const { notes, hasMore } = await listNotes(20, 0);
+      const { notes, hasMore } = await listNotes(PAGE_SIZE, 0);
       offsetRef.current = notes.length;
       setNotes(notes);
       setHasMore(hasMore);
@@ -53,32 +55,58 @@ export default function HomeView() {
     void load();
   }, [load]);
 
-  // 无限滚动：哨兵进入视口（提前 600px）→ 加载下一页
+  // 无限滚动：哨兵进入视口（提前 600px）→ 加载当前列表的下一页。
+  // 搜索结果与留言流互斥出现，共用一个哨兵；搜索复用同一查询向量翻页，
+  // 保证排序一致、无重复/跳漏。
   const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    try {
-      const { notes: page, hasMore: more } = await listNotes(20, offsetRef.current);
-      offsetRef.current += page.length;
-      setNotes((prev) => [...prev, ...page]);
-      setHasMore(more);
-      // 页面变长后刷新 Lenis 可滚动上限
-      lenisRef.current?.resize();
-    } catch {
-      // 下一页加载失败：静默，继续滚动会再次触发重试
-    } finally {
-      setLoadingMore(false);
+    if (loadingMore) return;
+    if (search) {
+      if (!search.hasMore) return;
+      setLoadingMore(true);
+      try {
+        const page = await searchNotes(search.vector, search.results.length, PAGE_SIZE);
+        setSearch((prev) =>
+          prev && prev.query === search.query
+            ? {
+                ...prev,
+                results: [...prev.results, ...page.results],
+                total: page.total,
+                hasMore: page.hasMore,
+              }
+            : prev,
+        );
+      } catch {
+        // 静默，继续滚动会重试
+      } finally {
+        setLoadingMore(false);
+      }
+    } else {
+      if (!hasMore) return;
+      setLoadingMore(true);
+      try {
+        const page = await listNotes(PAGE_SIZE, offsetRef.current);
+        offsetRef.current += page.notes.length;
+        setNotes((prev) => [...prev, ...page.notes]);
+        setHasMore(page.hasMore);
+      } catch {
+        // 静默，继续滚动会重试
+      } finally {
+        setLoadingMore(false);
+      }
     }
-  }, [loadingMore, hasMore]);
+    // 页面变长后刷新 Lenis 可滚动上限
+    lenisRef.current?.resize();
+  }, [loadingMore, search, hasMore]);
 
   const { ref: sentinelRef, inView: sentinelInView } = useInView({
     rootMargin: '600px 0px',
   });
 
   useEffect(() => {
-    if (outcome || !sentinelInView || loadingMore || !hasMore) return;
-    void loadMore();
-  }, [sentinelInView, loadingMore, hasMore, outcome, loadMore]);
+    if (!sentinelInView || loadingMore) return;
+    const more = search ? search.hasMore : hasMore;
+    if (more) void loadMore();
+  }, [sentinelInView, loadingMore, search, hasMore, loadMore]);
 
   // 滑到「最新留言」区顶部（着陆点留 20px 余量）
   const glideToBoard = useCallback(() => {
@@ -86,7 +114,7 @@ export default function HomeView() {
       const el = boardRef.current;
       if (!el) return;
       const lenis = lenisRef.current;
-      // 搜索结果/新留言会改变页面高度；先让 Lenis 重算可滚动上限，
+      // 结果/留言会改变页面高度；先让 Lenis 重算可滚动上限，
       // 否则 scrollTo 会把目标钳制在旧（短内容时的）上限，只滚半屏。
       lenis?.resize();
       const top = el.getBoundingClientRect().top + window.scrollY - 20;
@@ -111,7 +139,7 @@ export default function HomeView() {
       const vh = window.innerHeight;
       const down = event.deltaY > 0;
       if (down && y < vh * 0.5) {
-        // 搜索屏下滑 → 滑到「最新留言」
+        // 搜索屏下滑 → 滑到「最新留言」/搜索结果
         const el = boardRef.current;
         const top = el ? el.getBoundingClientRect().top + y : vh;
         lenis.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
@@ -130,7 +158,7 @@ export default function HomeView() {
   }, [reduced]);
 
   const handleResults = (o: SearchOutcome | null) => {
-    setOutcome(o);
+    setSearch(o);
     if (!o) return;
     glideToBoard();
   };
@@ -142,6 +170,13 @@ export default function HomeView() {
           <NoteCard note={note} verify />
         </Reveal>
       ))}
+    </div>
+  );
+
+  // 列表底部哨兵：滚动接近底部时加载下一页
+  const sentinel = (
+    <div ref={sentinelRef} className="home__more">
+      {loadingMore ? <span className="home__more-text">加载中…</span> : null}
     </div>
   );
 
@@ -167,49 +202,47 @@ export default function HomeView() {
       </section>
 
       <section className="home__board" ref={boardRef}>
-        {!outcome && (
-          <Reveal>
-            <h2 className="home__board-title">最新留言</h2>
-          </Reveal>
-        )}
-        {outcome ? (
+        {search ? (
           <>
             <p className="home__query">
-              「{outcome.query}」 · {outcome.results.length} 条候选
-              {outcome.results.length > 0 && (
-                <button type="button" className="home__clear" onClick={() => setOutcome(null)}>
+              「{search.query}」 · {search.total} 条候选
+              {search.total > 0 && (
+                <button type="button" className="home__clear" onClick={() => setSearch(null)}>
                   清除
                 </button>
               )}
             </p>
-            {outcome.results.length === 0 ? (
+            {search.total === 0 ? (
               <p className="home__empty">未找到匹配项。</p>
             ) : (
-              cards(outcome.results)
+              <>
+                {cards(search.results)}
+                {sentinel}
+              </>
             )}
           </>
-        ) : loading ? (
-          <p className="home__empty">加载中…</p>
-        ) : error ? (
-          <p className="home__error">加载失败：{error}</p>
-        ) : notes.length === 0 ? (
-          <p className="home__empty">暂无留言，点「发布留言」写下第一条吧。</p>
         ) : (
           <>
-            {cards(notes)}
-            {/* 无限滚动哨兵：滚到底附近自动加载下一页 */}
-            <div ref={sentinelRef} className="home__more">
-              {loadingMore ? <span className="home__more-text">加载中…</span> : null}
-            </div>
+            <Reveal>
+              <h2 className="home__board-title">最新留言</h2>
+            </Reveal>
+            {loading ? (
+              <p className="home__empty">加载中…</p>
+            ) : error ? (
+              <p className="home__error">加载失败：{error}</p>
+            ) : notes.length === 0 ? (
+              <p className="home__empty">暂无留言，点「发布留言」写下第一条吧。</p>
+            ) : (
+              <>
+                {cards(notes)}
+                {sentinel}
+              </>
+            )}
           </>
         )}
       </section>
 
-      <Modal
-        open={composing}
-        title="发布留言"
-        onClose={() => setComposing(false)}
-      >
+      <Modal open={composing} title="发布留言" onClose={() => setComposing(false)}>
         <NoteForm
           bare
           onCreated={() => {

@@ -37,6 +37,15 @@ export async function listNotes(
   return { notes: data.notes, hasMore: data.hasMore ?? false };
 }
 
-export function searchNotes(ngram_vector: number[]): Promise<{ results: SearchResult[] }> {
-  return post<{ results: SearchResult[] }>('/api/search', { ngram_vector });
+/** 搜索（分页）：total 为总命中数，results 为当前页，hasMore 是否还有下一页。 */
+export function searchNotes(
+  ngram_vector: number[],
+  offset = 0,
+  limit = 20,
+): Promise<{ results: SearchResult[]; total: number; hasMore: boolean }> {
+  return post<{ results: SearchResult[]; total: number; hasMore: boolean }>('/api/search', {
+    ngram_vector,
+    offset,
+    limit,
+  });
 }
