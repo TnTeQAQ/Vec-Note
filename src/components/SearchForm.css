@@ -8,6 +8,35 @@
   flex: 1;
 }
 
+/* 加载中：文字占位不可见（保持按钮宽度），中央显示旋转图标 */
+.search-form__label {
+  line-height: 1;
+}
+
+.search-form__label--hidden {
+  visibility: hidden;
+}
+
+.search-form__spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  animation: search-form-spin 1.1s linear infinite;
+}
+
+.search-form__spinner path {
+  fill: currentColor;
+}
+
+@keyframes search-form-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 .search-form__error {
   margin-top: 12px;
   color: var(--danger);

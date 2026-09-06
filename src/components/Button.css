@@ -62,16 +62,6 @@
   border-color: var(--border-soft);
 }
 
-/* 悬停：上浮 + 柔和投影（不再前景/背景反色）；
-   按下缩放手感由 --btn-scale 负责 */
-.btn:hover:not(:disabled) {
-  transform: scale(var(--btn-scale, 1)) translateY(-1px);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--fg) 16%, transparent);
-}
-
-.btn--outline:hover:not(:disabled) {
-  border-color: var(--fg);
-}
 
 .btn-ripple {
   position: absolute;
