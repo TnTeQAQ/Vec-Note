@@ -98,22 +98,36 @@
   color: var(--fg);
 }
 
-/* 详情弹窗内容 */
+/* 详情弹窗内容：头/脚固定，正文独立滚动 */
+.note-detail {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .note-detail__head {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--border-soft);
 }
 
+.note-detail__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 0;
+}
+
 .note-detail__actions {
+  flex: none;
   display: flex;
   justify-content: flex-end;
-  margin-top: 14px;
   padding-top: 12px;
   border-top: 2px solid var(--border-soft);
 }

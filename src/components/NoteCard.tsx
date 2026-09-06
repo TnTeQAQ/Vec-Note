@@ -103,7 +103,13 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
         </div>
       )}
 
-      <Modal open={openDetail} title="留言详情" size="lg" onClose={() => setOpenDetail(false)}>
+      <Modal
+        open={openDetail}
+        title="留言详情"
+        size="lg"
+        scrollBody={false}
+        onClose={() => setOpenDetail(false)}
+      >
         <div className="note-detail">
           <div className="note-detail__head">
             <CipherChip value={note.ciphertext} />
@@ -111,7 +117,9 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
               #{note.id.slice(0, 8)} · {new Date(note.created_at).toLocaleString('zh-CN')}
             </span>
           </div>
-          <RichText markdown={note.content} />
+          <div className="note-detail__body">
+            <RichText markdown={note.content} />
+          </div>
           <div className="note-detail__actions">
             <button type="button" className="note-detail__copy" onClick={copyContent}>
               {copiedDetail ? '已复制' : '复制留言'}

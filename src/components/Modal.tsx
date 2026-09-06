@@ -7,6 +7,7 @@ export default function Modal({
   onClose,
   children,
   size = 'md',
+  scrollBody = true,
 }: {
   open: boolean;
   title: string;
@@ -14,6 +15,8 @@ export default function Modal({
   children: ReactNode;
   /** md：常规表单；lg：长文详情 */
   size?: 'md' | 'lg';
+  /** false 时正文区不滚动，由 children 自行布局内部滚动区（如详情弹窗头脚固定） */
+  scrollBody?: boolean;
 }) {
   // Esc 关闭
   useEffect(() => {
@@ -57,7 +60,9 @@ export default function Modal({
             ×
           </button>
         </div>
-        <div className="modal__body">{children}</div>
+        <div className={scrollBody ? 'modal__body' : 'modal__body modal__body--noscroll'}>
+          {children}
+        </div>
       </div>
     </div>
   );

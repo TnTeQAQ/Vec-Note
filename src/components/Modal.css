@@ -11,9 +11,11 @@
 }
 
 .modal__panel {
+  display: flex;
+  flex-direction: column;
   width: min(600px, 100%);
   max-height: min(85svh, 720px);
-  overflow-y: auto;
+  overflow: hidden; /* 头部固定，正文区内部滚动 */
   background: var(--bg);
   color: var(--fg);
   border-radius: var(--radius);
@@ -29,11 +31,25 @@
 }
 
 .modal__head {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 14px;
+}
+
+.modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* children 自行布局内部滚动区（详情弹窗：头/脚固定、正文滚动） */
+.modal__body--noscroll {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal__title {
