@@ -5,6 +5,7 @@ import { createNote } from '../lib/api';
 import { CONTENT_MAX_LENGTH } from '../shared/constants';
 import Button from './Button';
 import CipherChip from './CipherChip';
+import Modal from './Modal';
 import './NoteForm.css';
 
 /**
@@ -24,6 +25,7 @@ export default function NoteForm({
   const [cipher, setCipher] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
 
   const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !submitting;
 
@@ -55,7 +57,9 @@ export default function NoteForm({
       setContent('');
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const limited = (err as { rateLimited?: boolean }).rateLimited === true;
+      if (limited) setRateLimited(true);
+      else setError(err instanceof Error ? err.message : String(err));
     } finally {
       setSubmitting(false);
     }
@@ -102,6 +106,17 @@ export default function NoteForm({
           <CipherChip value={cipher} />
         </div>
       )}
+
+      <Modal open={rateLimited} title="发送受限" onClose={() => setRateLimited(false)}>
+        <p className="note-form__ratelimit-msg">
+          同一 IP 每分钟只能发送一条留言，请稍后再试。
+        </p>
+        <div className="note-form__actions">
+          <Button variant="solid" onClick={() => setRateLimited(false)}>
+            知道了
+          </Button>
+        </div>
+      </Modal>
     </form>
   );
 }

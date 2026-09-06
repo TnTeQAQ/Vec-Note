@@ -17,7 +17,12 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : `HTTP ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(typeof data.error === 'string' ? data.error : `HTTP ${res.status}`);
+    (err as Error & { status?: number; rateLimited?: boolean }).status = res.status;
+    (err as Error & { rateLimited?: boolean }).rateLimited = data.rateLimited === true;
+    throw err;
+  }
   return data as T;
 }
 

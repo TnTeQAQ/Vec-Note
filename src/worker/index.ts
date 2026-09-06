@@ -44,7 +44,36 @@ function dot(a: number[], b: number[]): number {
   return s;
 }
 
+// 同一 IP 每分钟最多发送一条留言
+const RATE_LIMIT_MS = 60_000;
+
+function clientIp(request: Request): string {
+  const cf = request.headers.get('CF-Connecting-IP');
+  if (cf) return cf;
+  const xff = request.headers.get('X-Forwarded-For');
+  if (xff) return xff.split(',')[0].trim();
+  return 'unknown';
+}
+
+async function checkRateLimit(env: Env, ip: string): Promise<boolean> {
+  const now = Date.now();
+  const row = await env.DB.prepare('SELECT last_post_at FROM rate_limits WHERE ip = ?')
+    .bind(ip)
+    .first<{ last_post_at: number }>();
+  if (row && now - row.last_post_at < RATE_LIMIT_MS) return false;
+  await env.DB.prepare(
+    'INSERT INTO rate_limits (ip, last_post_at) VALUES (?, ?) ON CONFLICT(ip) DO UPDATE SET last_post_at = excluded.last_post_at',
+  )
+    .bind(ip, now)
+    .run();
+  return true;
+}
+
 async function createNote(request: Request, env: Env): Promise<Response> {
+  if (!(await checkRateLimit(env, clientIp(request)))) {
+    return json({ error: '发送太频繁，请稍后再试', rateLimited: true }, 429);
+  }
+
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;

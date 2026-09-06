@@ -41,3 +41,9 @@
 .note-form__hint {
   margin-top: 12px;
 }
+
+.note-form__ratelimit-msg {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
