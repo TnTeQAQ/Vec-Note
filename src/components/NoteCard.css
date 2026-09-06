@@ -4,6 +4,9 @@
   transition: background-color 160ms ease;
   /* 截断遮罩淡出的目标色（跟随行背景） */
   --fade-to: var(--bg);
+  /* 惰性渲染：屏外留言不布局不绘制，海量留言时滚动/主题切换更流畅 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
 }
 
 .note:hover {

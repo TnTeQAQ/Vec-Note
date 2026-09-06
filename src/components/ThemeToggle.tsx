@@ -110,6 +110,9 @@ export default function ThemeToggle() {
       ) + 24;
 
     setTheme(next); // the page itself is always the newest theme
+    // 切换瞬间禁用所有颜色过渡，避免海量节点同时过渡导致卡顿
+    document.documentElement.classList.add('no-transitions');
+    window.setTimeout(() => document.documentElement.classList.remove('no-transitions'), 400);
     wavesRef.current.push({ r: 0, theme: next, x, y, cover });
     if (!overlayRef.current) {
       const el = document.createElement('div');
