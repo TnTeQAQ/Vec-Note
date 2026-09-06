@@ -23,8 +23,8 @@ export type RevealProps = {
 export default function Reveal({
   children,
   delay = 0,
-  duration = 560,
-  y = 26,
+  duration = 360,
+  y = 12,
   className = '',
 }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);

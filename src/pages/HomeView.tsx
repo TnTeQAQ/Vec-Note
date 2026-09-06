@@ -77,7 +77,7 @@ export default function HomeView() {
             ) : (
               <div className="home__cards">
                 {outcome.results.map((note, index) => (
-                  <Reveal key={note.id} delay={Math.min(index, 8) * 40}>
+                  <Reveal key={note.id} delay={Math.min(index, 6) * 24}>
                     <NoteCard note={note} verify />
                   </Reveal>
                 ))}
@@ -93,7 +93,7 @@ export default function HomeView() {
         ) : (
           <div className="home__cards">
             {notes.map((note, index) => (
-              <Reveal key={note.id} delay={Math.min(index, 8) * 40}>
+              <Reveal key={note.id} delay={Math.min(index, 6) * 24}>
                 <NoteCard note={note} verify />
               </Reveal>
             ))}
