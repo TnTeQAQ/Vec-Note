@@ -39,6 +39,25 @@
   width: 100%;
 }
 
+/* 搜索屏下方的小号「关于」入口 */
+.home__about {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+
+.home__about:hover {
+  color: var(--fg);
+}
+
 .home__scroll-hint {
   position: absolute;
   bottom: 18px;

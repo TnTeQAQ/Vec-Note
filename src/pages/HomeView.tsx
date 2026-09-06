@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { listNotes, searchNotes, type Note } from '../lib/api';
+import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import NoteForm from '../components/NoteForm';
@@ -28,6 +29,7 @@ export default function HomeView() {
   const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
   const reduced = useReducedMotion();
+  const startReveal = usePageReveal();
   const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
 
   const load = useCallback(async () => {
@@ -145,6 +147,12 @@ export default function HomeView() {
     requestAnimationFrame(() => scrollToId('notes'));
   };
 
+  const goAbout = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isPlainClick(e)) return;
+    e.preventDefault();
+    startReveal('about', e.clientX, e.clientY);
+  };
+
   const cards = (list: Note[]) => (
     <div className="home__cards">
       {list.map((note, index) => (
@@ -176,6 +184,11 @@ export default function HomeView() {
             <Button variant="solid" size="md" onClick={() => setComposing(true)}>
               发布留言 →
             </Button>
+          </Reveal>
+          <Reveal delay={200}>
+            <button type="button" className="home__about" onClick={goAbout}>
+              关于 →
+            </button>
           </Reveal>
         </div>
         <a className="home__scroll-hint" href="#notes" aria-label="去最新留言">
