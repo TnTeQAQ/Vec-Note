@@ -32,15 +32,14 @@ src/
     router.tsx              # history.pushState + localStorage 恢复（URL 保持干净）
     pages.tsx               # 页面注册表：renderPage / getPageTitle
   pages/                    # 页面视图（每页同名 CSS）
-    HomeView                # hero + 最新留言预览 + 特性卡
-    BoardView               # 留言板：发布 + 最近留言
-    SearchView              # 搜索：召回 + 验签标注
-    LabView                 # 解密实验台：手动核查 + 流水线
+    HomeView                # 论坛主页：搜索 + 留言流（按密文分组折叠）
+    BoardView               # 发布留言表单（提交后回主页）
+    LabView                 # 解密实验台：手动核查
     AboutView               # 密码学说明（文章式排版）
     NotFoundView            # 404
   components/               # 复用组件（每个组件同名 CSS）
     Button / Reveal / ThemeToggle / NavBar / SectionHead / Badge
-    NoteCard / CipherChip / NoteForm / SearchForm / VerifyPanel
+    NoteCard / CipherChip / NoteGroupList / NoteForm / SearchForm / VerifyPanel
     PageReveal / page-reveal-context   # 点击导航 seam
   hooks/useReducedMotion.ts # 动效降级
   lib/

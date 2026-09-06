@@ -1,7 +1,7 @@
 .board {
   width: min(var(--maxw), 100%);
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 32px 24px 80px;
 }
 
 .board__title {
@@ -14,18 +14,4 @@
 
 .board__form {
   margin-top: 24px;
-}
-
-.board__section {
-  margin-top: 48px;
-}
-
-.board__empty {
-  color: var(--muted);
-}
-
-.board__error {
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 600;
 }

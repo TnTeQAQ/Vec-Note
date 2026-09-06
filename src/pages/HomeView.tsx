@@ -3,70 +3,91 @@ import { listNotes, type Note } from '../lib/api';
 import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
 import Reveal from '../components/Reveal';
-import SectionHead from '../components/SectionHead';
-import NoteCard from '../components/NoteCard';
+import SearchForm, { type SearchOutcome } from '../components/SearchForm';
+import NoteGroupList from '../components/NoteGroupList';
 import './HomeView.css';
 
+/**
+ * 论坛式主页：搜索 + 留言流（按密文分组折叠）一体，
+ * 顶部「发布留言 →」进入表单页。搜索页已并入此处。
+ */
 export default function HomeView() {
-  // home teaser: only the most recent notes
   const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
   const startReveal = usePageReveal();
 
   useEffect(() => {
     let alive = true;
-    listNotes(2)
+    listNotes(20)
       .then(({ notes }) => {
-        if (alive) setNotes(notes);
+        if (alive) {
+          setNotes(notes);
+          setError(null);
+        }
       })
-      .catch(() => {
-        /* 首页预览失败不阻塞 */
+      .catch((err) => {
+        if (alive) setError(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
       });
     return () => {
       alive = false;
     };
   }, []);
 
-  const go = (id: string, e: MouseEvent<HTMLElement>) => {
+  const goBoard = (e: MouseEvent<HTMLElement>) => {
     if (!isPlainClick(e)) return;
     e.preventDefault();
-    startReveal(id, e.clientX, e.clientY);
+    startReveal('board', e.clientX, e.clientY);
   };
+
+  const shown = outcome ? outcome.results : notes;
 
   return (
     <div className="home">
-      <section className="home__hero">
-        <div className="home__hero-inner">
-          <Reveal delay={80}>
-            <h1 className="home__title">Vec-Note</h1>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="home__subtitle">留言 + 搜索，标题明文从不入库。</p>
-          </Reveal>
-          <Reveal delay={240}>
-            <div className="home__cta">
-              <Button variant="solid" size="lg" onClick={(e) => go('board', e)}>
-                去留言 →
-              </Button>
-              <Button variant="outline" size="lg" onClick={(e) => go('search', e)}>
-                搜索留言
-              </Button>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <div className="home__head">
+        <h1 className="home__title">Vec-Note</h1>
+        <Button variant="solid" size="md" onClick={goBoard}>
+          发布留言 →
+        </Button>
+      </div>
 
-      <section className="home__section">
-        <Reveal>
-          <SectionHead title="Latest notes" target="board" actionLabel="View all →" />
-        </Reveal>
-        <div className="home__notes">
-          {notes.map((note, index) => (
-            <Reveal key={note.id} delay={index * 60}>
-              <NoteCard note={note} />
-            </Reveal>
-          ))}
-          {notes.length === 0 ? <p className="home__empty">还没有留言，去写下第一条吧。</p> : null}
+      <Reveal delay={60}>
+        <div className="home__search">
+          <SearchForm onResults={setOutcome} />
         </div>
+      </Reveal>
+
+      <section className="home__list">
+        {outcome ? (
+          <>
+            <p className="home__query">
+              「{outcome.query}」 · {outcome.results.length} 条候选
+              {outcome.results.length > 0 && (
+                <button type="button" className="home__clear" onClick={() => setOutcome(null)}>
+                  清除
+                </button>
+              )}
+            </p>
+            {outcome.results.length === 0 ? (
+              <p className="home__empty">未找到匹配项。</p>
+            ) : (
+              /* key 按查询词重挂载：每次新搜索重置折叠状态 */
+              <NoteGroupList key={outcome.query} notes={outcome.results} />
+            )}
+          </>
+        ) : loading ? (
+          <p className="home__empty">加载中…</p>
+        ) : error ? (
+          <p className="home__error">加载失败：{error}</p>
+        ) : notes.length === 0 ? (
+          <p className="home__empty">暂无留言，点右上角「发布留言」写下第一条吧。</p>
+        ) : (
+          <NoteGroupList notes={notes} />
+        )}
       </section>
     </div>
   );

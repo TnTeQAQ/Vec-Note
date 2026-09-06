@@ -5,8 +5,7 @@ import './NavBar.css';
 
 const LINKS: { pageId: string; label: string }[] = [
   { pageId: 'home', label: '首页' },
-  { pageId: 'board', label: '留言板' },
-  { pageId: 'search', label: '搜索' },
+  { pageId: 'board', label: '留言' },
   { pageId: 'lab', label: '实验台' },
   { pageId: 'about', label: '关于' },
 ];
