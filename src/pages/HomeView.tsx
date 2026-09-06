@@ -46,26 +46,28 @@ export default function HomeView() {
   // 滚轮一档：搜索屏 ↔ 留言屏 互相滑动（键盘/触屏滚动不受影响）
   useEffect(() => {
     let lockUntil = 0;
-    const glide = (top: number) => {
-      lockUntil = performance.now() + 900;
-      window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
-    };
     const onWheel = (event: WheelEvent) => {
-      if (performance.now() < lockUntil) return; // mid-glide
+      if (performance.now() < lockUntil) {
+        // 滑动进行中：吞掉后续滚轮事件，避免触控板惯性打断平滑滚动
+        event.preventDefault();
+        return;
+      }
       const vh = window.innerHeight;
       const y = window.scrollY;
-      if (y < vh * 0.4 && event.deltaY > 0) {
-        // 在搜索屏：下滑 → 滑到留言区
+      if (event.deltaY > 0 && y < vh * 0.35) {
+        // 在搜索屏：下滑 → 滑到留言区（着陆点高出区块 20px，不顶死）
         event.preventDefault();
+        lockUntil = performance.now() + 1400;
         const el = boardRef.current;
         const top = el
-          ? el.getBoundingClientRect().top + window.scrollY - 20
+          ? el.getBoundingClientRect().top + y - 20
           : vh - 20;
-        glide(top);
-      } else if (y < vh * 1.2 && y > vh * 0.6 && event.deltaY < 0) {
+        window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+      } else if (event.deltaY < 0 && y > vh * 0.55 && y < vh * 1.3) {
         // 在留言区顶部：上滑 → 回到搜索屏
         event.preventDefault();
-        glide(0);
+        lockUntil = performance.now() + 1400;
+        window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
       }
       // 其余区间交给浏览器原生滚动
     };
