@@ -10,8 +10,8 @@ import NoteCard from '../components/NoteCard';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import './HomeView.css';
 
-/** 每页条数：一次加载足够多，滚动加载更连续 */
-const PAGE_SIZE = 50;
+/** 每页条数 */
+const PAGE_SIZE = 10;
 
 /**
  * 论坛式主页，双屏结构（锚点导航，无自定义滚动逻辑）：

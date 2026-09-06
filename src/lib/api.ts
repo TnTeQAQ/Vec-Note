@@ -28,7 +28,7 @@ export function createNote(content: string, ngram_vector: number[], title_ct: st
 
 /** 最近留言（分页）：limit 每页条数、offset 偏移；hasMore 表示是否还有下一页。 */
 export async function listNotes(
-  limit = 20,
+  limit = 10,
   offset = 0,
 ): Promise<{ notes: Note[]; hasMore: boolean }> {
   const res = await fetch(`/api/notes?limit=${limit}&offset=${offset}`);
@@ -41,7 +41,7 @@ export async function listNotes(
 export function searchNotes(
   ngram_vector: number[],
   offset = 0,
-  limit = 20,
+  limit = 10,
 ): Promise<{ results: SearchResult[]; total: number; hasMore: boolean }> {
   return post<{ results: SearchResult[]; total: number; hasMore: boolean }>('/api/search', {
     ngram_vector,
