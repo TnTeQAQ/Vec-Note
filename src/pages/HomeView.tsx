@@ -4,12 +4,12 @@ import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
 import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
-import NoteGroupList from '../components/NoteGroupList';
+import NoteCard from '../components/NoteCard';
 import './HomeView.css';
 
 /**
- * 论坛式主页：搜索 + 留言流（按密文分组折叠）一体，
- * 顶部「发布留言 →」进入表单页。搜索页已并入此处。
+ * 论坛式主页：搜索 + 留言流一体，按时间先后扁平展示（不分组），
+ * 顶部「发布留言 →」进入表单页。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -75,8 +75,13 @@ export default function HomeView() {
             {outcome.results.length === 0 ? (
               <p className="home__empty">未找到匹配项。</p>
             ) : (
-              /* key 按查询词重挂载：每次新搜索重置折叠状态 */
-              <NoteGroupList key={outcome.query} notes={outcome.results} />
+              <div className="home__cards">
+                {outcome.results.map((note, index) => (
+                  <Reveal key={note.id} delay={Math.min(index, 8) * 40}>
+                    <NoteCard note={note} verify />
+                  </Reveal>
+                ))}
+              </div>
             )}
           </>
         ) : loading ? (
@@ -86,7 +91,13 @@ export default function HomeView() {
         ) : notes.length === 0 ? (
           <p className="home__empty">暂无留言，点右上角「发布留言」写下第一条吧。</p>
         ) : (
-          <NoteGroupList notes={notes} />
+          <div className="home__cards">
+            {notes.map((note, index) => (
+              <Reveal key={note.id} delay={Math.min(index, 8) * 40}>
+                <NoteCard note={note} verify />
+              </Reveal>
+            ))}
+          </div>
         )}
       </section>
     </div>

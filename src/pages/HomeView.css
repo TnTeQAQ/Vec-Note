@@ -27,6 +27,12 @@
   margin-top: 24px;
 }
 
+.home__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .home__query {
   font-size: 13px;
   font-weight: 800;
