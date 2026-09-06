@@ -1,9 +1,10 @@
-.theme-toggle {
+.theme-toggle,
+.fab-round {
   width: 36px;
   height: 36px;
   border: 2px solid var(--border);
   border-radius: 50%;
-  background: transparent;
+  background: var(--bg);
   font-size: 15px;
   line-height: 1;
   color: var(--fg);
@@ -14,21 +15,27 @@
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.fab-round:hover {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
 }
 
-/* Floating action button placement (bottom-right) */
+/* 右下角悬浮操作组（回到顶部 + 主题切换，同款圆形按钮） */
 .theme-fab {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
-.theme-fab .theme-toggle {
+.theme-fab .theme-toggle,
+.theme-fab .fab-round {
   width: 46px;
   height: 46px;
   font-size: 18px;

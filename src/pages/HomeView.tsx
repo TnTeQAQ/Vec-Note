@@ -27,7 +27,6 @@ export default function HomeView() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
-  const [pastTop, setPastTop] = useState(false);
   const reduced = useReducedMotion();
   const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
 
@@ -58,18 +57,6 @@ export default function HomeView() {
     },
     [reduced],
   );
-
-  const scrollTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
-  }, [reduced]);
-
-  // 超过第一屏后显示「回到搜索」悬浮按钮
-  useEffect(() => {
-    const onScroll = () => setPastTop(window.scrollY > window.innerHeight * 0.7);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   // 滚轮一屏切换（无状态意图判断，动画交给浏览器原生 smooth）：
   // 首页向下滚动 → 自动定位到评论区（#notes）；
@@ -236,12 +223,6 @@ export default function HomeView() {
           </>
         )}
       </section>
-
-      {pastTop && (
-        <button type="button" className="home__totop" onClick={scrollTop} aria-label="回到搜索">
-          ↑
-        </button>
-      )}
 
       <Modal open={composing} title="发布留言" onClose={() => setComposing(false)}>
         <NoteForm bare onCreated={handleCreated} />

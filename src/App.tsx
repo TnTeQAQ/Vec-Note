@@ -4,6 +4,7 @@ import { usePageRouter } from './router/context';
 import { getPageTitle, renderPage } from './router/pages';
 import { PageRevealProvider } from './components/PageReveal';
 import ThemeToggle from './components/ThemeToggle';
+import ScrollTopButton from './components/ScrollTopButton';
 
 function ViewOutlet() {
   const { page } = usePageRouter();
@@ -25,6 +26,7 @@ function Shell() {
     <PageRevealProvider>
       <ViewOutlet />
       <div className="theme-fab">
+        <ScrollTopButton />
         <ThemeToggle />
       </div>
     </PageRevealProvider>

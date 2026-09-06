@@ -69,33 +69,6 @@
   }
 }
 
-/* 超过第一屏后出现的「回到搜索」悬浮按钮 */
-.home__totop {
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 90;
-  width: 38px;
-  height: 38px;
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  background: var(--bg);
-  font-size: 16px;
-  line-height: 1;
-  color: var(--fg);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 22px color-mix(in srgb, var(--fg) 20%, transparent);
-  transition: background-color 160ms ease, color 160ms ease;
-}
-
-.home__totop:hover {
-  background: var(--fg);
-  color: var(--bg);
-}
-
 .home__board {
   width: min(var(--maxw), 100%);
   margin: 0 auto;
