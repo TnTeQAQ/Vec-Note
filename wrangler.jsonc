@@ -19,6 +19,12 @@
 		"directory": "./dist",
 		"binding": "ASSETS"
 	},
+	"routes": [
+		{
+			"pattern": "note.tnteqaq.com",
+			"custom_domain": true
+		}
+	],
 	// D1 与 Worker 代码完全分离：库是独立托管资源，仅靠 database_id 绑定。
 	// wrangler deploy 只上传 Worker/静态资源，绝不会删除或重建该库；
 	// 表结构变更只能通过 migrations（db:migrate:remote）显式执行，迁移全部为 IF NOT EXISTS 幂等。
