@@ -186,17 +186,11 @@ export default function HomeView() {
             </Button>
           </Reveal>
         </div>
-        <a className="home__scroll-hint" href="#notes" aria-label="去最新留言">
-          ↓
-        </a>
-      </section>
-
-      {/* 搜索屏底部 / 评论区之上的「关于」入口 */}
-      <div className="home__bridge">
+        {/* 第一屏底部居中的「关于」入口 */}
         <button type="button" className="home__about" onClick={goAbout}>
           关于 →
         </button>
-      </div>
+      </section>
 
       <section className="home__board" id="notes">
         {search ? (

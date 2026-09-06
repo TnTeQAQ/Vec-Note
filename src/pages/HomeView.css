@@ -39,14 +39,12 @@
   width: 100%;
 }
 
-/* 搜索屏底部、评论区之上的「关于」入口 */
-.home__bridge {
-  text-align: center;
-  padding: 10px 24px 0;
-}
-
-/* 搜索屏下方的小号「关于」入口 */
+/* 第一屏底部居中的「关于」入口（原「去最新留言 ↓」位置） */
 .home__about {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
   border: 0;
   background: none;
   padding: 0;
@@ -62,36 +60,6 @@
 
 .home__about:hover {
   color: var(--fg);
-}
-
-.home__scroll-hint {
-  position: absolute;
-  bottom: 18px;
-  left: 50%;
-  display: block;
-  font-size: 15px;
-  line-height: 1;
-  color: var(--muted);
-  text-decoration: none;
-  animation: home-hint-bob 2.2s ease-in-out infinite;
-}
-
-@keyframes home-hint-bob {
-  0%,
-  100% {
-    transform: translate(-50%, 0);
-    opacity: 0.7;
-  }
-  50% {
-    transform: translate(-50%, 6px);
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home__scroll-hint {
-    animation: none;
-  }
 }
 
 .home__board {
