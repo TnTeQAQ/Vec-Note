@@ -25,7 +25,9 @@ export default function ScrollTopButton() {
       title="回到顶部"
       aria-label="回到顶部"
     >
-      ↑
+      <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M512 212.423111L0 724.437333l38.698667 38.712889L512 289.848889l473.301333 473.301333L1024 724.437333z" />
+      </svg>
     </button>
   );
 }

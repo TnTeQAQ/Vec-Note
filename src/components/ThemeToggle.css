@@ -41,3 +41,11 @@
   font-size: 18px;
   box-shadow: 0 6px 22px color-mix(in srgb, var(--fg) 24%, transparent);
 }
+
+/* 回到顶部图标（自适应主题色） */
+.fab-round svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  display: block;
+}
