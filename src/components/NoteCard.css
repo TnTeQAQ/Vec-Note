@@ -1,43 +1,37 @@
-.note-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px 22px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--fg);
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+.note {
+  padding: 16px 6px 18px;
+  border-bottom: 2px solid var(--border-soft);
+  transition: background-color 160ms ease;
 }
 
-.note-card:hover {
-  background: var(--fg);
-  color: var(--bg);
-  transform: translateY(-2px);
+.note:hover {
+  background: color-mix(in srgb, var(--border-soft) 40%, transparent);
 }
 
-.note-card__content {
-  font-size: 15px;
-  line-height: 1.65;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.note-card__meta {
+.note__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.note__id {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.note__fill {
+  flex: 1;
+}
+
+.note__time {
   font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--muted);
-  transition: color 180ms ease;
 }
 
-/* 「去验证」浮在内容右上角，与第一行平行（float 不独占一行） */
-.note-card__verify {
-  float: right;
-  margin: 3px 0 4px 12px;
+.note__verify {
   border: 0;
   background: none;
   padding: 0;
@@ -50,30 +44,17 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 160ms ease, opacity 160ms ease;
+  transition: color 160ms ease;
 }
 
-.note-card__verify:hover {
+.note__verify:hover {
   color: var(--fg);
 }
 
-.note-card:hover .note-card__verify {
-  color: var(--bg);
-  opacity: 0.75;
-}
-
-.note-card:hover .note-card__verify:hover {
-  color: var(--bg);
-  opacity: 1;
-}
-
-/* 反色时保持 meta 可读 */
-.note-card:hover .note-card__meta {
-  color: var(--bg);
-  opacity: 0.72;
-}
-
-.note-card__id {
-  font-family: var(--mono);
-  letter-spacing: 0;
+.note__content {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

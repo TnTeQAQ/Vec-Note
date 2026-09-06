@@ -30,7 +30,11 @@
 .home__cards {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+}
+
+/* 末条不再画分隔线 */
+.home__cards > :last-child .note {
+  border-bottom: none;
 }
 
 .home__query {

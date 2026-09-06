@@ -17,20 +17,10 @@ export function relTime(ts: number): string {
 }
 
 /**
- * 留言卡片：密文 chip + 内容 + meta。视觉参考 blog_site 的 PostCard
- * （2px 实线边框、悬停反色），但留言卡不可点击跳转。
- * 在已按密文分组的容器里传 hideChip 省略重复的密文标识；
- * 传 verify 时在 meta 上显示「去验证」——点击携带密文跳转实验台。
+ * 留言条目（留言板风格）：指纹 + ID / 去验证 / 时间一行头，内容随下，
+ * 行与行之间用细分隔线——不是卡片盒子。verify 显示「去验证」入口。
  */
-export default function NoteCard({
-  note,
-  hideChip = false,
-  verify = false,
-}: {
-  note: Note;
-  hideChip?: boolean;
-  verify?: boolean;
-}) {
+export default function NoteCard({ note, verify = false }: { note: Note; verify?: boolean }) {
   const startReveal = usePageReveal();
 
   const goVerify = (e: React.MouseEvent) => {
@@ -40,20 +30,19 @@ export default function NoteCard({
   };
 
   return (
-    <article className="note-card">
-      {!hideChip && <CipherChip value={note.ciphertext} />}
-      <p className="note-card__content selectable">
+    <article className="note">
+      <div className="note__head">
+        <CipherChip value={note.ciphertext} />
+        <span className="note__id">#{note.id.slice(0, 8)}</span>
+        <span className="note__fill" />
         {verify && (
-          <button type="button" className="note-card__verify" onClick={goVerify}>
+          <button type="button" className="note__verify" onClick={goVerify}>
             去验证
           </button>
         )}
-        {note.content}
-      </p>
-      <div className="note-card__meta">
-        <span className="note-card__id">#{note.id.slice(0, 8)}</span>
-        <span>{relTime(note.created_at)}</span>
+        <span className="note__time">{relTime(note.created_at)}</span>
       </div>
+      <p className="note__content selectable">{note.content}</p>
     </article>
   );
 }
