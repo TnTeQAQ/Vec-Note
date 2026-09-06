@@ -123,31 +123,3 @@
   overflow-y: auto;
   padding: 14px 0;
 }
-
-.note-detail__actions {
-  flex: none;
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 12px;
-  border-top: 2px solid var(--border-soft);
-}
-
-.note-detail__copy {
-  border: 0;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 160ms ease;
-}
-
-.note-detail__copy:hover {
-  color: var(--fg);
-}
