@@ -16,7 +16,6 @@
   overflow-y: auto;
   background: var(--bg);
   color: var(--fg);
-  border: 2px solid var(--border);
   border-radius: var(--radius);
   padding: 22px 24px;
   box-shadow: 0 18px 50px color-mix(in srgb, var(--fg) 30%, transparent);
