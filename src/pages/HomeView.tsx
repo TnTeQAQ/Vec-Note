@@ -11,6 +11,8 @@ import { useReducedMotion } from '../hooks/useReducedMotion';
 import './HomeView.css';
 
 const easeOut: EasingFunction = (t: number) => 1 - Math.pow(1 - t, 3);
+/** 翻屏动画时长（秒）：稍快但仍平滑 */
+const GLIDE_SECONDS = 0.6;
 
 /**
  * 论坛式主页，双屏结构：
@@ -64,10 +66,10 @@ export default function HomeView() {
         // 搜索屏下滑 → 滑到「最新留言」
         const el = boardRef.current;
         const top = el ? el.getBoundingClientRect().top + y : vh;
-        lenis.scrollTo(top, { duration: 0.8, easing: easeOut });
+        lenis.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
       } else if (!down && y > vh * 0.5 && y < vh * 1.4) {
         // 留言区顶部上滑 → 回搜索屏
-        lenis.scrollTo(0, { duration: 0.8, easing: easeOut });
+        lenis.scrollTo(0, { duration: GLIDE_SECONDS, easing: easeOut });
       }
       // 其余位置：交给 lenis 原生平滑滚动
     };
@@ -94,7 +96,7 @@ export default function HomeView() {
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - 20;
       if (lenisRef.current) {
-        lenisRef.current.scrollTo(top, { duration: 0.8, easing: easeOut });
+        lenisRef.current.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
       } else {
         window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
       }
