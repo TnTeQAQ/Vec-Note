@@ -251,11 +251,9 @@ export default function HomeView() {
           <>
             <p className="home__query">
               「{search.query}」 · {search.total} 条候选
-              {search.total > 0 && (
-                <button type="button" className="home__clear" onClick={() => setSearch(null)}>
-                  清除
-                </button>
-              )}
+              <button type="button" className="home__clear" onClick={() => setSearch(null)}>
+                清除
+              </button>
             </p>
             {search.total === 0 ? (
               <p className="home__empty">未找到匹配项。</p>
