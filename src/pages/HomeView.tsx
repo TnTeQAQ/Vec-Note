@@ -71,6 +71,30 @@ export default function HomeView() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // 滚轮一屏切换（无状态意图判断，动画交给浏览器原生 smooth）：
+  // 首页向下滚动 → 自动定位到评论区（#notes）；
+  // 评论区顶部（0.5~1.5 屏高内）向上滚动 → 定位回搜索（#top）。
+  // 更深处滚动不受影响（原生）；弹窗内滚动不触发。
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      const t = e.target as Element | null;
+      if (t && typeof t.closest === 'function' && t.closest('.modal')) return;
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      const down = e.deltaY > 0;
+      if (down && y < vh * 0.5) {
+        e.preventDefault();
+        const el = document.getElementById('notes');
+        if (el) el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      } else if (!down && y > vh * 0.5 && y < vh * 1.5) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+      }
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, [reduced]);
+
   // 无限滚动：哨兵进入视口（提前 600px）→ 加载当前列表的下一页。
   // 搜索结果与留言流互斥出现，共用一个哨兵；搜索复用同一查询向量翻页。
   const loadMore = useCallback(async () => {
