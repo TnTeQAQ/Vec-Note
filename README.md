@@ -38,7 +38,7 @@ src/
     AboutView               # 密码学说明（文章式排版）
     NotFoundView            # 404
   components/               # 复用组件（每个组件同名 CSS）
-    Button / Reveal / ThemeToggle / NavBar / SectionHead / Badge
+    Button / Reveal / ThemeToggle / BackLink / SectionHead / Badge
     NoteCard / CipherChip / NoteForm / SearchForm / VerifyPanel
     PageReveal / page-reveal-context   # 点击导航 seam
   hooks/useReducedMotion.ts # 动效降级

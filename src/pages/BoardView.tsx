@@ -1,6 +1,7 @@
 import { type MouseEvent } from 'react';
 import { usePageReveal } from '../components/page-reveal-context';
 import Reveal from '../components/Reveal';
+import BackLink from '../components/BackLink';
 import NoteForm from '../components/NoteForm';
 import './BoardView.css';
 
@@ -16,6 +17,7 @@ export default function BoardView() {
 
   return (
     <div className="board">
+      <BackLink />
       <Reveal>
         <h1 className="board__title">发布留言</h1>
       </Reveal>

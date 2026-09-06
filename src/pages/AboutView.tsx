@@ -1,4 +1,5 @@
 import Reveal from '../components/Reveal';
+import BackLink from '../components/BackLink';
 import './AboutView.css';
 
 /**
@@ -7,6 +8,7 @@ import './AboutView.css';
 export default function AboutView() {
   return (
     <div className="about">
+      <BackLink />
       <Reveal>
         <h1 className="about__title">关于 Vec-Note</h1>
         <p className="about__lede">

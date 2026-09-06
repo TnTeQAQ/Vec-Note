@@ -1,4 +1,5 @@
 import Reveal from '../components/Reveal';
+import BackLink from '../components/BackLink';
 import VerifyPanel from '../components/VerifyPanel';
 import './LabView.css';
 
@@ -6,6 +7,7 @@ import './LabView.css';
 export default function LabView() {
   return (
     <div className="lab">
+      <BackLink />
       <Reveal>
         <h1 className="lab__title">解密实验台</h1>
       </Reveal>

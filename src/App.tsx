@@ -3,7 +3,6 @@ import { PageRouterProvider } from './router/router';
 import { usePageRouter } from './router/context';
 import { getPageTitle, renderPage } from './router/pages';
 import { PageRevealProvider } from './components/PageReveal';
-import NavBar from './components/NavBar';
 import ThemeToggle from './components/ThemeToggle';
 
 function ViewOutlet() {
@@ -24,7 +23,6 @@ function Shell() {
 
   return (
     <PageRevealProvider>
-      <NavBar />
       <ViewOutlet />
       <div className="theme-fab">
         <ThemeToggle />
