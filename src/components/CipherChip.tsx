@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { textHue } from '../lib/color';
+import { cipherColor } from '../lib/color';
 import './CipherChip.css';
 
 async function copyToClipboard(text: string): Promise<void> {
@@ -24,7 +24,6 @@ async function copyToClipboard(text: string): Promise<void> {
  */
 export default function CipherChip({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
-  const hue = textHue(value);
 
   async function handleClick() {
     try {
@@ -40,7 +39,7 @@ export default function CipherChip({ value }: { value: string }) {
     <button
       type="button"
       className="cipher-chip"
-      style={{ '--chip-c': `hsl(${hue}, 68%, 46%)` } as React.CSSProperties}
+      style={{ '--chip-c': cipherColor(value) } as React.CSSProperties}
       onClick={handleClick}
       title="点击复制完整密文"
       aria-label="复制完整密文"
