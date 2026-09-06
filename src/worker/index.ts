@@ -1,7 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import {
   VECTOR_DIM,
-  SEARCH_LIMIT,
   LIST_LIMIT,
   CONTENT_MAX_LENGTH,
   SIMILARITY_EPSILON,
@@ -149,7 +148,9 @@ async function search(request: Request, env: Env): Promise<Response> {
   }
 
   ranked.sort((a, b) => b.score - a.score);
-  const top = ranked.slice(0, SEARCH_LIMIT).map(({ id, created_at, ciphertext, content, score }) => ({
+  // 返回全部高于阈值的匹配（按相似度排序）；不做条数截断，
+  // 否则库内匹配量超过固定上限时，靠后的留言会永远搜不到。
+  const top = ranked.map(({ id, created_at, ciphertext, content, score }) => ({
     id,
     created_at,
     ciphertext,
