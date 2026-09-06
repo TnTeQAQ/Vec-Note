@@ -35,13 +35,6 @@
   width: min(640px, 100%);
 }
 
-.home__logo {
-  display: block;
-  width: clamp(56px, 9vw, 80px);
-  height: clamp(56px, 9vw, 80px);
-  color: var(--fg);
-}
-
 .home__title {
   font-family: var(--sans);
   font-size: clamp(2.2rem, 6vw, 3.4rem);
