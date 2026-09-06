@@ -191,6 +191,13 @@ export default function HomeView() {
         </a>
       </section>
 
+      {/* 搜索屏底部 / 评论区之上的「关于」入口 */}
+      <div className="home__bridge">
+        <button type="button" className="home__about" onClick={goAbout}>
+          关于 →
+        </button>
+      </div>
+
       <section className="home__board" id="notes">
         {search ? (
           <>
@@ -231,12 +238,6 @@ export default function HomeView() {
           </>
         )}
       </section>
-
-      <footer className="home__foot">
-        <button type="button" className="home__about" onClick={goAbout}>
-          关于 →
-        </button>
-      </footer>
 
       <Modal open={composing} title="发布留言" onClose={() => setComposing(false)}>
         <NoteForm bare onCreated={handleCreated} />
