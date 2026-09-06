@@ -51,15 +51,15 @@
   font: inherit;
   font-size: 12px;
   letter-spacing: 0.1em;
-  color: var(--muted);
+  color: var(--fg);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 160ms ease;
+  transition: opacity 160ms ease;
 }
 
 .home__about:hover {
-  color: var(--fg);
+  opacity: 0.6;
 }
 
 .home__board {
