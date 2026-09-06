@@ -5,7 +5,15 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  /* 点阵网格背景，呼应「向量空间」 */
+  overflow: hidden;
+}
+
+/* 点阵网格背景独立成一层，遮罩只作用于背景，不影响前景文字 */
+.home__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background-image: radial-gradient(
     color-mix(in srgb, var(--fg) 22%, transparent) 1.2px,
     transparent 1.2px
@@ -14,6 +22,7 @@
   background-position: center;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
+  pointer-events: none;
 }
 
 .home__hero-inner {
@@ -44,6 +53,7 @@
   position: absolute;
   left: 50%;
   bottom: 18px;
+  z-index: 1;
   transform: translateX(-50%);
   border: 0;
   background: none;
