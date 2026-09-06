@@ -8,6 +8,14 @@
   background: var(--bg);
 }
 
+/* 弹窗内使用：外层容器已带边框与内边距 */
+.note-form--bare {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 .note-form .field-label {
   margin-top: 10px;
 }

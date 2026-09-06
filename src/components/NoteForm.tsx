@@ -9,8 +9,15 @@ import './NoteForm.css';
 /**
  * 发布留言：标题在浏览器本地向量化 + BLS 签名（即密文），只上传
  * 内容 + 公开向量 + 密文；标题明文从不离开浏览器。
+ * bare：在弹窗等外层已带边框的容器里使用，去掉自身边框与内边距。
  */
-export default function NoteForm({ onCreated }: { onCreated: () => void }) {
+export default function NoteForm({
+  onCreated,
+  bare = false,
+}: {
+  onCreated: () => void;
+  bare?: boolean;
+}) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [cipher, setCipher] = useState<string | null>(null);
@@ -54,7 +61,7 @@ export default function NoteForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <form className="note-form" onSubmit={handleSubmit}>
+    <form className={`note-form${bare ? ' note-form--bare' : ''}`} onSubmit={handleSubmit}>
       <label className="field-label" htmlFor="note-title">
         标题
       </label>

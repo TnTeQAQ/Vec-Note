@@ -32,8 +32,7 @@ src/
     router.tsx              # history.pushState + localStorage 恢复（URL 保持干净）
     pages.tsx               # 页面注册表：renderPage / getPageTitle
   pages/                    # 页面视图（每页同名 CSS）
-    HomeView                # 论坛主页：搜索 + 留言流（按时间排序）
-    BoardView               # 发布留言表单（提交后回主页）
+    HomeView                # 论坛主页：搜索 + 留言流（按时间排序）；发布用弹窗表单
     LabView                 # 解密实验台：手动核查
     AboutView               # 密码学说明（文章式排版）
     NotFoundView            # 404

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';
 import type { EasingFunction } from 'lenis';
 import { listNotes, type Note } from '../lib/api';
-import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
+import Modal from '../components/Modal';
+import NoteForm from '../components/NoteForm';
 import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
 import NoteCard from '../components/NoteCard';
@@ -16,39 +17,49 @@ const GLIDE_SECONDS = 0.6;
 
 /**
  * 论坛式主页，双屏结构：
- * - 第一屏（100svh 居中）：搜索框 + 发布入口；
+ * - 第一屏（100svh 居中）：搜索框 + 发布入口（弹窗表单）；
  * - 第二屏：最新留言流（按时间排序）。
- * 滚轮翻屏由 Lenis + Snap('lock') 库驱动，不手写动画。
+ * 滚轮翻屏由 Lenis 平滑驱动，发布留言不跳页、用弹窗完成。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
-  const startReveal = usePageReveal();
+  const [composing, setComposing] = useState(false);
   const reduced = useReducedMotion();
   const boardRef = useRef<HTMLElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    listNotes(20)
-      .then(({ notes }) => {
-        if (alive) {
-          setNotes(notes);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        if (alive) setError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
-    return () => {
-      alive = false;
-    };
+  const load = useCallback(async () => {
+    try {
+      const { notes } = await listNotes(20);
+      setNotes(notes);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  // 滑到「最新留言」区顶部（着陆点留 20px 余量）
+  const glideToBoard = useCallback(() => {
+    requestAnimationFrame(() => {
+      const el = boardRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 20;
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
+      } else {
+        window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+      }
+    });
+  }, [reduced]);
 
   // 滚轮翻屏：Lenis 负责全页平滑滚动与翻屏动画（不手写任何动画）；
   // 这里只做「翻屏意图」判定，动画委托 lenis.scrollTo——
@@ -81,26 +92,10 @@ export default function HomeView() {
     };
   }, [reduced]);
 
-  const goBoard = (e: MouseEvent<HTMLElement>) => {
-    if (!isPlainClick(e)) return;
-    e.preventDefault();
-    startReveal('board', e.clientX, e.clientY);
-  };
-
   const handleResults = (o: SearchOutcome | null) => {
     setOutcome(o);
     if (!o) return;
-    // 提交搜索后直接滑到结果区
-    requestAnimationFrame(() => {
-      const el = boardRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY - 20;
-      if (lenisRef.current) {
-        lenisRef.current.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
-      } else {
-        window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
-      }
-    });
+    glideToBoard();
   };
 
   const cards = (list: Note[]) => (
@@ -124,7 +119,7 @@ export default function HomeView() {
             <SearchForm onResults={handleResults} />
           </Reveal>
           <Reveal delay={140}>
-            <Button variant="solid" size="md" onClick={goBoard}>
+            <Button variant="solid" size="md" onClick={() => setComposing(true)}>
               发布留言 →
             </Button>
           </Reveal>
@@ -166,6 +161,21 @@ export default function HomeView() {
           cards(notes)
         )}
       </section>
+
+      <Modal
+        open={composing}
+        title="发布留言"
+        onClose={() => setComposing(false)}
+      >
+        <NoteForm
+          bare
+          onCreated={() => {
+            setComposing(false);
+            void load();
+            glideToBoard(); // 发完滑到留言区，看到刚发布的留言
+          }}
+        />
+      </Modal>
     </div>
   );
 }
