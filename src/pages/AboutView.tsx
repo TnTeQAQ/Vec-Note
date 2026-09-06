@@ -99,14 +99,6 @@ export default function AboutView() {
             <li>「字符 → 哈希桶」的映射被密钥打乱，没有密钥，从 <code>sealed_vector</code> 推不出字符；</li>
             <li>API 永不返回向量字段（只给相似度排名和匹配数）。</li>
           </ul>
-
-          <h3 className="about__h3">4. 工程细节</h3>
-          <ul className="about__list">
-            <li>自研 pageId 单页路由（history + localStorage 恢复，URL 保持干净）；</li>
-            <li>留言流和搜索结果都走分页无限滚动（react-intersection-observer）；</li>
-            <li>内容上限 16000 字符，后端强制校验；</li>
-            <li>同一标题的留言密文相同，可以按密文把留言聚成一组——匿名地看出“这些出自同一个标题”。</li>
-          </ul>
         </section>
       </Reveal>
 
@@ -117,7 +109,7 @@ export default function AboutView() {
             <li>纯前端项目的「私钥」随 JS 下发。这不是对浏览代码的人保密，演示的是<strong>「标题明文不离浏览器、不可反推」</strong>这一条。</li>
             <li>只有字符 n-gram：语义近义不命中。</li>
             <li>剩余泄漏：能看出词项数量的量级（≈ 标题长度量级）。</li>
-            <li>随机抖动让子字命中带概率，同词相似度约 89% 而不是 100%——这是有意为之。</li>
+            <li>随机抖动让搜「手」这类子字时命中时而不命中，同一标题的相似度约 89% 而不是 100%。</li>
           </ul>
         </section>
       </Reveal>
