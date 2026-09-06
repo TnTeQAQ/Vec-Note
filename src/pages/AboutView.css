@@ -33,6 +33,14 @@
   margin-bottom: 12px;
 }
 
+.about__h3 {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  margin: 18px 0 8px;
+}
+
 .about__p {
   font-size: 14px;
   line-height: 1.8;
