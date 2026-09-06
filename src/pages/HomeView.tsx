@@ -43,36 +43,54 @@ export default function HomeView() {
     };
   }, []);
 
-  // 滚轮一档：搜索屏 ↔ 留言屏 互相滑动（键盘/触屏滚动不受影响）
+  // 滚轮一档：搜索屏 ↔ 留言屏 互相滑动（键盘/触屏滚动不受影响）。
+  // 自绘 rAF 缓动：时长可控、锁定期与动画等长，连续滚动也能即时响应。
   useEffect(() => {
     let lockUntil = 0;
+    let raf = 0;
+    const glide = (to: number) => {
+      cancelAnimationFrame(raf);
+      const from = window.scrollY;
+      const duration = reduced ? 0 : 650;
+      lockUntil = performance.now() + duration + 120;
+      if (duration === 0) {
+        window.scrollTo(0, to);
+        return;
+      }
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        window.scrollTo(0, from + (to - from) * eased);
+        if (t < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    };
     const onWheel = (event: WheelEvent) => {
       if (performance.now() < lockUntil) {
-        // 滑动进行中：吞掉后续滚轮事件，避免触控板惯性打断平滑滚动
+        // 滑动进行中：吞掉后续滚轮事件，避免惯性打断动画
         event.preventDefault();
         return;
       }
       const vh = window.innerHeight;
       const y = window.scrollY;
-      if (event.deltaY > 0 && y < vh * 0.35) {
-        // 在搜索屏：下滑 → 滑到留言区（着陆点高出区块 20px，不顶死）
+      if (event.deltaY > 0 && y < vh * 0.5) {
+        // 搜索屏：下滑 → 滑到留言区（着陆点高出区块 20px，不顶死）
         event.preventDefault();
-        lockUntil = performance.now() + 1400;
         const el = boardRef.current;
-        const top = el
-          ? el.getBoundingClientRect().top + y - 20
-          : vh - 20;
-        window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
-      } else if (event.deltaY < 0 && y > vh * 0.55 && y < vh * 1.3) {
-        // 在留言区顶部：上滑 → 回到搜索屏
+        glide(el ? el.getBoundingClientRect().top + y - 20 : vh - 20);
+      } else if (event.deltaY < 0 && y > vh * 0.5 && y < vh * 1.3) {
+        // 留言区顶部：上滑 → 回到搜索屏
         event.preventDefault();
-        lockUntil = performance.now() + 1400;
-        window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+        glide(0);
       }
-      // 其余区间交给浏览器原生滚动
+      // 留言区深处交给浏览器原生滚动
     };
     window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      cancelAnimationFrame(raf);
+    };
   }, [reduced]);
 
   const goBoard = (e: MouseEvent<HTMLElement>) => {
