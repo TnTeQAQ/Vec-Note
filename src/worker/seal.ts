@@ -1,5 +1,5 @@
 import { sha256 } from '@noble/hashes/sha2.js';
-import { VECTOR_DIM } from '../shared/constants';
+import { VECTOR_DIM, SHARED_SLOT_ABS_MIN } from '../shared/constants';
 
 export interface SealKey {
   perm: number[]; // 随机置换 π：[0, DIM) -> [0, DIM)
@@ -64,4 +64,23 @@ export function seal(v: number[], key: SealKey): number[] {
     out[key.perm[i]] = key.signs[i] * (v[i] || 0);
   }
   return out;
+}
+
+/**
+ * 统计两个向量“显著共享槽位”的数量：
+ * 要求同一维度两边都超过 SHARED_SLOT_ABS_MIN，且符号相同（乘积 > 0）。
+ *
+ * 该判定可直接用于密封后的向量：密封只是带符号置换，只改变槽位顺序与整体符号，
+ * 不改变每个分量的绝对值，也不改变“同槽同号/异号”关系，因此计数结果与明文向量一致。
+ * 用来保证搜索结果至少与查询共享一个真实的 n-gram 哈希槽位（而非纯噪声重叠）。
+ */
+export function countSharedSlots(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  let count = 0;
+  for (let i = 0; i < n; i++) {
+    if (a[i] * b[i] > 0 && Math.abs(a[i]) > SHARED_SLOT_ABS_MIN && Math.abs(b[i]) > SHARED_SLOT_ABS_MIN) {
+      count++;
+    }
+  }
+  return count;
 }

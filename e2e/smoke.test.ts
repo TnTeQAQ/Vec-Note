@@ -67,7 +67,7 @@ describe('e2e smoke (live wrangler dev)', () => {
           body: JSON.stringify({ ngram_vector: embed('电话')! }),
         })
       ).json()) as { results: unknown[] };
-      // 无共享字符 → 只剩噪声级重叠，低于 5% 阈值 → 无结果
+      // 无共享字符 → 只剩噪声级重叠，低于 30% 阈值且无共享槽位 → 无结果
       expect(phone.results.length).toBe(0);
     },
     30000,

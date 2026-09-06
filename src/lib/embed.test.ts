@@ -60,7 +60,7 @@ describe('embed (char n-gram hashing + jitter/dropout)', () => {
     expect(mean).toBeLessThan(expected + 0.04);
   });
 
-  it('无关词「手机」vs「电话」重叠只剩噪声级（低于 5% 阈值）', () => {
+  it('无关词「手机」vs「电话」重叠只剩噪声级（低于 5%，非搜索阈值）', () => {
     for (const s1 of [1, 2, 3]) {
       for (const s2 of [4, 5, 6]) {
         const c = cos(embed('手机', { seed: s1 })!, embed('电话', { seed: s2 })!);

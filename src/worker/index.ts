@@ -4,8 +4,9 @@ import {
   LIST_LIMIT,
   CONTENT_MAX_LENGTH,
   SIMILARITY_EPSILON,
+  MIN_SHARED_SLOTS,
 } from '../shared/constants';
-import { makeSealKey, seal, type SealKey } from './seal';
+import { makeSealKey, seal, countSharedSlots, type SealKey } from './seal';
 import { ensureSeedNote } from './seed';
 import {
   loginAdmin,
@@ -181,7 +182,8 @@ async function search(request: Request, env: Env): Promise<Response> {
     const vn = Math.sqrt(dot(sv, sv));
     if (vn === 0) continue;
     const score = dot(q, sv) / (qNorm * vn);
-    if (score > SIMILARITY_EPSILON) {
+    // 必须同时满足：余弦高于阈值，且与查询至少共享一个显著 n-gram 哈希槽位。
+    if (score > SIMILARITY_EPSILON && countSharedSlots(q, sv) >= MIN_SHARED_SLOTS) {
       ranked.push({
         id: r.id,
         created_at: r.created_at,

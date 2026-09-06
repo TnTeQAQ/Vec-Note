@@ -52,7 +52,7 @@ export default function AboutView() {
           <ul className="about__list">
             <li><strong>发布</strong>：浏览器向量化（embed）+ 签名（signTitle），上传 <code>内容 + 公开向量 + 密文</code>。</li>
             <li><strong>存储</strong>：Worker 用 <code>VEC_SEAL_SECRET</code> 密封向量后落库。</li>
-            <li><strong>搜索</strong>：查询词向量化 → 密封 → 余弦相似度召回（阈值 5%），分页返回。</li>
+            <li><strong>搜索</strong>：查询词向量化 → 密封 → 余弦相似度召回（阈值 30%，且要求至少共享一个 n-gram 哈希槽位），分页返回。</li>
             <li><strong>验证</strong>：密文 + 候选标题在核查弹窗做 BLS 验签。</li>
           </ul>
         </section>

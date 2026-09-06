@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { VECTOR_DIM, SIMILARITY_EPSILON } from '../shared/constants';
+import { VECTOR_DIM, SIMILARITY_EPSILON, MIN_SHARED_SLOTS } from '../shared/constants';
 import { embed } from '../lib/embed';
 import { verifyTitle } from '../lib/crypto';
-import { makeSealKey, seal } from './seal';
+import { makeSealKey, seal, countSharedSlots } from './seal';
 import {
   ensureSeedNote,
   SEED_NOTE_CIPHERTEXT,
@@ -92,12 +92,13 @@ describe('ensureSeedNote（README 示例留言初始化）', () => {
     expect(inserts).toHaveLength(1);
   });
 
-  it('README 检索召回：密封后的存储向量与检索向量余弦远超阈值', async () => {
+  it('README 检索召回：密封后的存储向量与检索向量余弦远超阈值且共享槽位充足', async () => {
     const key = makeSealKey('test-secret');
     const stored = seal(embed(SEED_NOTE_TITLE, { forStorage: true, seed: SEED_EMBED_SEED })!, key);
     for (let i = 0; i < 5; i++) {
       const q = seal(embed(SEED_NOTE_TITLE)!, key);
       expect(cos(q, stored)).toBeGreaterThan(SIMILARITY_EPSILON);
+      expect(countSharedSlots(q, stored)).toBeGreaterThanOrEqual(MIN_SHARED_SLOTS);
     }
   });
 });
