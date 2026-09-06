@@ -185,11 +185,6 @@ export default function HomeView() {
               发布留言 →
             </Button>
           </Reveal>
-          <Reveal delay={200}>
-            <button type="button" className="home__about" onClick={goAbout}>
-              关于 →
-            </button>
-          </Reveal>
         </div>
         <a className="home__scroll-hint" href="#notes" aria-label="去最新留言">
           ↓
@@ -236,6 +231,12 @@ export default function HomeView() {
           </>
         )}
       </section>
+
+      <footer className="home__foot">
+        <button type="button" className="home__about" onClick={goAbout}>
+          关于 →
+        </button>
+      </footer>
 
       <Modal open={composing} title="发布留言" onClose={() => setComposing(false)}>
         <NoteForm bare onCreated={handleCreated} />

@@ -39,6 +39,12 @@
   width: 100%;
 }
 
+/* 页面底部页脚 */
+.home__foot {
+  padding: 40px 24px 24px;
+  text-align: center;
+}
+
 /* 搜索屏下方的小号「关于」入口 */
 .home__about {
   border: 0;
