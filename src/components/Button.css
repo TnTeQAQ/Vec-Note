@@ -18,9 +18,13 @@
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 1; /* 不透明：灰底灰字，而非半透明 */
   cursor: not-allowed;
   transform: none;
+  color: color-mix(in srgb, var(--fg) 45%, var(--bg));
+  background: color-mix(in srgb, var(--fg) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--fg) 18%, var(--bg));
+  box-shadow: none;
 }
 
 .btn--sm {
