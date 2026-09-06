@@ -34,15 +34,10 @@
   transition: color 180ms ease;
 }
 
-/* 卡片顶行：密文指纹居左，「去验证」推到右上角 */
-.note-card__top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+/* 「去验证」浮在内容右上角，与第一行平行（float 不独占一行） */
 .note-card__verify {
-  margin-left: auto;
+  float: right;
+  margin: 3px 0 4px 12px;
   border: 0;
   background: none;
   padding: 0;

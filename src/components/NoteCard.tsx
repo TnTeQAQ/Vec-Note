@@ -41,15 +41,15 @@ export default function NoteCard({
 
   return (
     <article className="note-card">
-      <div className="note-card__top">
-        {!hideChip && <CipherChip value={note.ciphertext} />}
+      {!hideChip && <CipherChip value={note.ciphertext} />}
+      <p className="note-card__content selectable">
         {verify && (
           <button type="button" className="note-card__verify" onClick={goVerify}>
             去验证
           </button>
         )}
-      </div>
-      <p className="note-card__content selectable">{note.content}</p>
+        {note.content}
+      </p>
       <div className="note-card__meta">
         <span className="note-card__id">#{note.id.slice(0, 8)}</span>
         <span>{relTime(note.created_at)}</span>
