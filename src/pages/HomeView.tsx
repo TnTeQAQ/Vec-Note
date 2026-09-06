@@ -43,8 +43,9 @@ export default function HomeView() {
     };
   }, []);
 
-  // 滚轮一档：搜索屏 ↔ 留言屏。无锁、可瞬时反向——任何方向的滚轮立即响应，
-  // 动画中反方向滚动会从当前位置立刻反向，来回切换始终丝滑。
+    // 滚轮：搜索屏 ↔ 留言屏。
+  // 只在「停顿后重新开始的手势」里滑屏；滑动中同向滚动立即取消滑屏交给原生，
+  // 连续向下滚动不吞输入、不停顿；反方向滚动则从当前位置立刻反向，来回丝滑。
   useEffect(() => {
     if (reduced) return; // 减弱动效：交给原生滚动
 
@@ -53,22 +54,22 @@ export default function HomeView() {
     let from = 0;
     let to = 0;
     let t0 = 0;
-    const DURATION = 420;
+    let lastWheel = 0; // 上一个滚轮事件的时刻（0 = 从未滚过）
+    const DURATION = 360;
 
     const boardTop = () => {
       const el = boardRef.current;
       return el ? el.getBoundingClientRect().top + window.scrollY - 20 : window.innerHeight - 20;
     };
 
-    const clear = () => {
+    const cancel = () => {
       cancelAnimationFrame(raf);
       active = false;
     };
 
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / DURATION);
-      // easeInOutQuad
-      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const e = 1 - Math.pow(1 - t, 3); // easeOutCubic：起步快，不显停顿
       window.scrollTo(0, from + (to - from) * e);
       if (t < 1) raf = requestAnimationFrame(step);
       else active = false;
@@ -78,32 +79,41 @@ export default function HomeView() {
       from = window.scrollY;
       to = next;
       t0 = performance.now();
-      clear();
+      cancel();
       active = true;
       raf = requestAnimationFrame(step);
     };
 
     const onWheel = (event: WheelEvent) => {
+      const now = performance.now();
+      const idle = now - lastWheel; // 距上一个滚轮事件的间隔
+      lastWheel = now;
+
       const y = window.scrollY;
       const vh = window.innerHeight;
       const atSearch = y < vh * 0.5;
       const down = event.deltaY > 0;
 
-      if (!active) {
-        if (down && atSearch) {
-          event.preventDefault();
-          glide(boardTop());
-        } else if (!down && !atSearch && y < vh * 1.3) {
-          // 留言区顶部往上滚 → 回搜索屏；更深处原生滚动
-          event.preventDefault();
-          glide(0);
+      if (active) {
+        if (down === to > from) {
+          // 同向持续滚动：取消滑屏、不拦截本档 → 原生无缝续滚，输入不吞
+          cancel();
+          return;
         }
+        // 反向滚动：从当前位置立刻反向
+        event.preventDefault();
+        glide(down ? boardTop() : 0);
         return;
       }
-      // 动画中：反向滚轮立即反向，同向吞掉保持连贯
-      event.preventDefault();
-      if (down !== to > from) {
-        glide(down ? boardTop() : 0);
+
+      // 仅「停顿 500ms 后的新手势」才滑屏；连续滚动交给原生，绝不卡顿
+      if (idle < 500) return;
+      if (down && atSearch) {
+        event.preventDefault();
+        glide(boardTop());
+      } else if (!down && !atSearch && y < vh * 1.3) {
+        event.preventDefault();
+        glide(0);
       }
     };
 
@@ -167,6 +177,11 @@ export default function HomeView() {
       </section>
 
       <section className="home__board" ref={boardRef}>
+        {!outcome && (
+          <Reveal>
+            <h2 className="home__board-title">最新留言</h2>
+          </Reveal>
+        )}
         {outcome ? (
           <>
             <p className="home__query">

@@ -74,6 +74,15 @@
   min-height: 70svh;
 }
 
+.home__board-title {
+  font-family: var(--sans);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
 .home__query {
   font-size: 13px;
   font-weight: 800;
