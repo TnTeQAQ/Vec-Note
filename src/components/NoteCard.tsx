@@ -73,7 +73,7 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
         </div>
       )}
 
-      <Modal open={openDetail} title="留言详情" onClose={() => setOpenDetail(false)}>
+      <Modal open={openDetail} title="留言详情" size="lg" onClose={() => setOpenDetail(false)}>
         <div className="note-detail">
           <div className="note-detail__head">
             <CipherChip value={note.ciphertext} />

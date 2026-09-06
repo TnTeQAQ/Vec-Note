@@ -22,6 +22,12 @@
   animation: modal-pop 200ms var(--ease-out);
 }
 
+/* 长文详情弹窗：更宽更高 */
+.modal__panel--lg {
+  width: min(860px, calc(100vw - 40px));
+  max-height: 90svh;
+}
+
 .modal__head {
   display: flex;
   align-items: center;

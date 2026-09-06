@@ -135,6 +135,9 @@ export default function HomeView() {
     lenisRef.current = lenis;
 
     const onWheel = (event: WheelEvent) => {
+      // 弹窗（详情/发布）内的滚动交给其自身容器，不触发翻屏
+      const target = event.target as Element | null;
+      if (target && typeof target.closest === 'function' && target.closest('.modal')) return;
       const y = window.scrollY;
       const vh = window.innerHeight;
       const down = event.deltaY > 0;

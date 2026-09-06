@@ -6,11 +6,14 @@ export default function Modal({
   title,
   onClose,
   children,
+  size = 'md',
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** md：常规表单；lg：长文详情 */
+  size?: 'md' | 'lg';
 }) {
   // Esc 关闭
   useEffect(() => {
@@ -32,7 +35,13 @@ export default function Modal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal__panel" role="dialog" aria-modal="true" aria-label={title}>
+      <div
+        className={`modal__panel modal__panel--${size}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        data-lenis-prevent
+      >
         <div className="modal__head">
           <h2 className="modal__title">{title}</h2>
           <button type="button" className="modal__close" onClick={onClose} aria-label="关闭">
