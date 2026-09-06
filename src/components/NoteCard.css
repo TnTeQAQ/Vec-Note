@@ -2,13 +2,10 @@
   padding: 16px 6px 18px;
   border-bottom: 2px solid var(--border-soft);
   transition: background-color 160ms ease;
-  /* 截断淡出渐变的目标色（跟随悬停反色） */
-  --fade-to: var(--bg);
 }
 
 .note:hover {
   background: color-mix(in srgb, var(--border-soft) 40%, transparent);
-  --fade-to: color-mix(in srgb, var(--border-soft) 40%, var(--bg));
 }
 
 .note__head {
@@ -54,7 +51,7 @@
   color: var(--fg);
 }
 
-/* 列表内的内容预览：限高 4 行 + 底部淡出，过长即截断 */
+/* 列表内的内容预览：限高 4 行，过长即截断 */
 .note__content {
   position: relative;
   margin: 0;
@@ -63,17 +60,6 @@
   max-height: calc(1.7em * 4);
   overflow: hidden;
   word-break: break-word;
-}
-
-.note__content::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1.7em;
-  background: linear-gradient(to bottom, transparent, var(--fade-to));
-  pointer-events: none;
 }
 
 .note__expand {
