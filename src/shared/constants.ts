@@ -1,7 +1,8 @@
 // 客户端与 Worker 共用的常量（单一事实来源）。
 export const VECTOR_DIM = 1024;
 export const LIST_LIMIT = 20;
-export const CONTENT_MAX_LENGTH = 2000;
+// 留言内容上限（后端强制校验）
+export const CONTENT_MAX_LENGTH = 500;
 // 低于该余弦的重叠视为噪声级，不作为搜索候选返回
 export const SIMILARITY_EPSILON = 0.05;
 // 存储模式下每个 n-gram 词项被保留的概率（1 - 丢弃率）：

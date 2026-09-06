@@ -1,0 +1,83 @@
+/* Markdown 留言排版（净化后渲染） */
+.rich > :first-child {
+  margin-top: 0;
+}
+
+.rich > :last-child {
+  margin-bottom: 0;
+}
+
+.rich p {
+  margin: 0.4em 0;
+}
+
+.rich h1,
+.rich h2,
+.rich h3 {
+  font-family: var(--sans);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 0.7em 0 0.3em;
+}
+
+.rich h1 {
+  font-size: 1.25rem;
+}
+
+.rich h2 {
+  font-size: 1.1rem;
+}
+
+.rich h3 {
+  font-size: 1rem;
+}
+
+.rich ul,
+.rich ol {
+  margin: 0.4em 0;
+  padding-left: 1.5em;
+}
+
+.rich li {
+  margin: 0.2em 0;
+}
+
+.rich code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--border-soft);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.rich pre {
+  margin: 0.6em 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.rich pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.rich blockquote {
+  margin: 0.5em 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--border-soft);
+  color: var(--muted);
+}
+
+.rich hr {
+  margin: 0.9em 0;
+  border: 0;
+  border-top: 2px solid var(--border-soft);
+}
+
+.rich a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

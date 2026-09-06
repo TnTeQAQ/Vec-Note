@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { embed } from '../lib/embed';
 import { signTitle } from '../lib/crypto';
 import { createNote } from '../lib/api';
+import { CONTENT_MAX_LENGTH } from '../shared/constants';
 import Button from './Button';
 import CipherChip from './CipherChip';
 import './NoteForm.css';
@@ -84,6 +85,7 @@ export default function NoteForm({
         onChange={(e) => setContent(e.target.value)}
         placeholder="请输入内容"
         rows={4}
+        maxLength={CONTENT_MAX_LENGTH}
       />
 
       <div className="note-form__actions">

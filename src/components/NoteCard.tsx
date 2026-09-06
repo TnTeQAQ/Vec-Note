@@ -1,4 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import CipherChip from './CipherChip';
+import Modal from './Modal';
+import RichText from './RichText';
 import { usePageReveal } from './page-reveal-context';
 import { stageVerifyCipher } from '../lib/verify-handoff';
 import type { Note } from '../lib/api';
@@ -18,10 +21,25 @@ export function relTime(ts: number): string {
 
 /**
  * 留言条目（留言板风格）：指纹 + ID / 去验证 / 时间一行头，内容随下，
- * 行与行之间用细分隔线——不是卡片盒子。verify 显示「去验证」入口。
+ * 行与行之间用细分隔线。内容渲染为净化后的 Markdown；
+ * 过长时在列表里截断，点「查看全文」在弹窗里看完整内容。
  */
 export default function NoteCard({ note, verify = false }: { note: Note; verify?: boolean }) {
   const startReveal = usePageReveal();
+  const [openDetail, setOpenDetail] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  // 内容超过截断高度时显示「查看全文」
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [note.content]);
 
   const goVerify = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -42,7 +60,30 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
         )}
         <span className="note__time">{relTime(note.created_at)}</span>
       </div>
-      <p className="note__content selectable">{note.content}</p>
+
+      <div className="note__content selectable" ref={contentRef}>
+        <RichText markdown={note.content} />
+      </div>
+
+      {overflowing && (
+        <div className="note__expand">
+          <button type="button" className="note__expand-btn" onClick={() => setOpenDetail(true)}>
+            … 查看全文
+          </button>
+        </div>
+      )}
+
+      <Modal open={openDetail} title="留言详情" onClose={() => setOpenDetail(false)}>
+        <div className="note-detail">
+          <div className="note-detail__head">
+            <CipherChip value={note.ciphertext} />
+            <span className="note__time">
+              #{note.id.slice(0, 8)} · {new Date(note.created_at).toLocaleString('zh-CN')}
+            </span>
+          </div>
+          <RichText markdown={note.content} />
+        </div>
+      </Modal>
     </article>
   );
 }
