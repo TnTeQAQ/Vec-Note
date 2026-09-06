@@ -19,6 +19,25 @@ export default function AboutView() {
 
       <Reveal delay={40}>
         <section className="about__block">
+          <h2 className="about__h2">开源</h2>
+          <p className="about__p">
+            项目完整源码托管在 GitHub，欢迎 Star 与 Issue：
+          </p>
+          <p className="about__p">
+            <a
+              className="about__repo"
+              href="https://github.com/TnTeQAQ/Vec-Note"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              github.com/TnTeQAQ/Vec-Note ↗
+            </a>
+          </p>
+        </section>
+      </Reveal>
+
+      <Reveal delay={60}>
+        <section className="about__block">
           <h2 className="about__h2">初衷</h2>
           <p className="about__p">
             传统留言板标题明文入库，数据库泄露即全量暴露。本项目在浏览器端把标题拆成
@@ -27,19 +46,19 @@ export default function AboutView() {
         </section>
       </Reveal>
 
-      <Reveal delay={60}>
+      <Reveal delay={80}>
         <section className="about__block">
           <h2 className="about__h2">数据流</h2>
           <ul className="about__list">
             <li><strong>发布</strong>：浏览器向量化（embed）+ 签名（signTitle），上传 <code>内容 + 公开向量 + 密文</code>。</li>
             <li><strong>存储</strong>：Worker 用 <code>VEC_SEAL_SECRET</code> 密封向量后落库。</li>
             <li><strong>搜索</strong>：查询词向量化 → 密封 → 余弦相似度召回（阈值 5%），分页返回。</li>
-            <li><strong>验证</strong>：密文 + 候选标题在「实验台」做 BLS 验签。</li>
+            <li><strong>验证</strong>：密文 + 候选标题在核查弹窗做 BLS 验签。</li>
           </ul>
         </section>
       </Reveal>
 
-      <Reveal delay={80}>
+      <Reveal delay={100}>
         <section className="about__block">
           <h2 className="about__h2">实现要点</h2>
 
@@ -70,7 +89,7 @@ export default function AboutView() {
         </section>
       </Reveal>
 
-      <Reveal delay={100}>
+      <Reveal delay={120}>
         <section className="about__block">
           <h2 className="about__h2">限制</h2>
           <ul className="about__list">
@@ -82,7 +101,7 @@ export default function AboutView() {
         </section>
       </Reveal>
 
-      <Reveal delay={120}>
+      <Reveal delay={140}>
         <section className="about__block">
           <h2 className="about__h2">技术栈</h2>
           <ul className="about__list">

@@ -24,11 +24,66 @@ interface ToastApi {
 
 const ToastContext = createContext<ToastApi | null>(null);
 
-const KIND_GLYPH: Record<ToastKind, string> = {
-  success: '✓',
-  error: '!',
-  info: 'i',
-};
+/** 圆环 + 图形描边图标（成功 ✓ / 失败 ✗ / 提示 i），随 currentColor 取色 */
+function CheckIcon() {
+  return (
+    <svg
+      className="toast__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9.25" />
+      <path d="M7.3 12.3l3 3.2 6.3-6.8" />
+    </svg>
+  );
+}
+
+function CrossIcon() {
+  return (
+    <svg
+      className="toast__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9.25" />
+      <path d="M8.3 8.3l7.4 7.4" />
+      <path d="M15.7 8.3l-7.4 7.4" />
+    </svg>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      className="toast__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9.25" />
+      <path d="M12 11.2v4.6" />
+      <path d="M12 7.4v.1" />
+    </svg>
+  );
+}
+
+const KIND_ICON = {
+  success: <CheckIcon />,
+  error: <CrossIcon />,
+  info: <InfoIcon />,
+} as const;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -51,7 +106,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div key={t.id} className={`toast toast--${t.kind}`}>
             <span className="toast__glyph" aria-hidden="true">
-              {KIND_GLYPH[t.kind]}
+              {KIND_ICON[t.kind]}
             </span>
             <span className="toast__text">{t.text}</span>
           </div>

@@ -77,3 +77,17 @@
   color: var(--fg);
   word-break: break-all;
 }
+
+/* 页面内链接（如 GitHub 仓库地址）：下划线 + 悬停淡出 */
+.about a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: opacity 160ms ease;
+  word-break: break-all;
+}
+
+.about a:hover {
+  opacity: 0.6;
+}

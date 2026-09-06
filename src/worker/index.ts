@@ -6,6 +6,7 @@ import {
   SIMILARITY_EPSILON,
 } from '../shared/constants';
 import { makeSealKey, seal, type SealKey } from './seal';
+import { ensureSeedNote } from './seed';
 import {
   loginAdmin,
   logoutAdmin,
@@ -217,8 +218,15 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
 
   if (p === '/api/notes' && request.method === 'POST') return createNote(request, env);
-  if (p === '/api/notes' && request.method === 'GET') return listNotes(request, env, url);
-  if (p === '/api/search' && request.method === 'POST') return search(request, env);
+  if (p === '/api/notes' && request.method === 'GET') {
+    // 站点初始化：全新数据库第一次被访问时种入 README 示例留言
+    await ensureSeedNote(env, sealKey(env));
+    return listNotes(request, env, url);
+  }
+  if (p === '/api/search' && request.method === 'POST') {
+    await ensureSeedNote(env, sealKey(env));
+    return search(request, env);
+  }
 
   // 留言详情操作（仅管理员删除）
   const noteMatch = /^\/api\/notes\/([^/]+)$/.exec(p);
@@ -233,7 +241,15 @@ export default {
     void ctx;
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith('/api/')) return handleApi(request, env, url);
+    if (url.pathname.startsWith('/api/')) {
+      try {
+        return await handleApi(request, env, url);
+      } catch (err) {
+        // 未预期异常：记录日志并返回统一 JSON 500（避免 CF 裸 1101 文本）
+        console.error('API error:', err);
+        return json({ error: '服务器内部错误' }, 500);
+      }
+    }
 
     // 静态资源（含前端构建产物）；未知路径在 GET 时回退到 index.html（SPA）。
     const asset = await env.ASSETS.fetch(request);

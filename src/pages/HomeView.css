@@ -35,6 +35,13 @@
   width: min(640px, 100%);
 }
 
+.home__logo {
+  display: block;
+  width: clamp(56px, 9vw, 80px);
+  height: clamp(56px, 9vw, 80px);
+  color: var(--fg);
+}
+
 .home__title {
   font-family: var(--sans);
   font-size: clamp(2.2rem, 6vw, 3.4rem);
@@ -76,7 +83,9 @@
   width: min(var(--maxw), 100%);
   margin: 0 auto;
   padding: 40px 24px 80px;
-  min-height: 70svh;
+  /* 留言板至少占满一屏：无留言/少留言时也保证能整屏下翻到评论区，
+     避免第一屏底部的「关于」入口悬停在页面中部 */
+  min-height: 100svh;
 }
 
 .home__board-title {

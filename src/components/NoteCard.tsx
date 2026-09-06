@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import CipherChip from './CipherChip';
 import Modal from './Modal';
 import RichText from './RichText';
-import { usePageReveal } from './page-reveal-context';
-import { stageVerifyCipher } from '../lib/verify-handoff';
+import VerifyModal from './VerifyModal';
 import type { Note } from '../lib/api';
 import './NoteCard.css';
 
@@ -36,8 +35,8 @@ export default function NoteCard({
   admin?: boolean;
   onDelete?: (note: Note) => void;
 }) {
-  const startReveal = usePageReveal();
   const [openDetail, setOpenDetail] = useState(false);
+  const [openVerify, setOpenVerify] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
 
@@ -54,8 +53,7 @@ export default function NoteCard({
 
   const goVerify = (e: React.MouseEvent) => {
     e.stopPropagation();
-    stageVerifyCipher(note.ciphertext);
-    startReveal('lab', e.clientX, e.clientY);
+    setOpenVerify(true);
   };
 
   return (
@@ -111,6 +109,12 @@ export default function NoteCard({
           </div>
         </div>
       </Modal>
+
+      <VerifyModal
+        open={openVerify}
+        cipher={note.ciphertext}
+        onClose={() => setOpenVerify(false)}
+      />
     </article>
   );
 }

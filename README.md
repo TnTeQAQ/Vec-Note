@@ -22,12 +22,20 @@
 
 1. **留言**：输入标题 + 内容 → 浏览器对标题做 `embed()` 向量化（含随机抖动；存储侧随机丢弃词项）与 `signTitle()` 签名 → 只上传 `内容 + 公开向量 + 密文`。
 2. **存储**：Worker 用 `VEC_SEAL_SECRET` 把公开向量密封成 `sealed_vector` 落库；`title_ct` 是密文；`content` 明文。
-3. **搜索**：浏览器对查询词向量化 → Worker 密封后按余弦相似度召回**全部**高于 5% 阈值的候选（按相似度排序，返回 `密文 + 内容 + 匹配度`，不返回相似度原始分数与向量）→ **应用不做自动验证**：用户复制密文到「解密实验台」输入候选标题手动核查，BLS 验签通过即「✓ 验证成功」。
+3. **搜索**：浏览器对查询词向量化 → Worker 密封后按余弦相似度召回**全部**高于 5% 阈值的候选（按相似度排序，返回 `密文 + 内容 + 匹配度`，不返回相似度原始分数与向量）→ **应用不做自动验证**：留言卡片上点「去验证」弹出核查窗口，输入候选标题明文手动核查，BLS 验签通过即「✓ 验证成功」。
 
 对照示例（提交标题「手机」、内容「测试内容」）：
 - 搜「手机」→ 命中，相似度约 89%（抖动使同词检索永不达到 100%）。
-- 搜「手」→ 有可能命中（约七成概率：共享字符 + 存储侧随机丢弃词项），命中后可到实验台验证密文。
+- 搜「手」→ 有可能命中（约七成概率：共享字符 + 存储侧随机丢弃词项），命中后可在核查弹窗验证密文。
 - 搜「电话」→ 不命中（无共享字符，只剩噪声级重叠，低于 5% 相似度阈值）。
+
+## 初始数据（README 示例留言）
+
+数据库第一次被访问时（首页列表或首次搜索），Worker 会自动种入一条标题为 **README** 的示例留言（固定 ID `8f3a2c1d-4e5f-4a9b-8c7d-2e3f4a5b6c7d`，幂等，只种一条）：
+
+- 内容是一条快速上手简介：点卡片「去验证」输入 `README` → 「验证成功」；搜索 `README` 也能搜到这条；
+- 密文是 `signTitle('README')` 的确定性输出（BLS12-381 签名，base64url）；密封向量在运行时用真实 `VEC_SEAL_SECRET` 计算——SQL 迁移无法预知部署环境的密钥，故初始化放在 Worker 代码里；
+- 实现见 `src/worker/seed.ts`，行为测试见 `src/worker/seed.test.ts`。
 
 ## 目录结构
 
@@ -44,12 +52,11 @@ src/
     pages.tsx               # 页面注册表：renderPage / getPageTitle
   pages/                    # 页面视图（每页同名 CSS）
     HomeView                # 论坛主页：搜索 + 留言流（按时间排序）；发布用弹窗表单
-    LabView                 # 解密实验台：手动核查
     AboutView               # 密码学说明（文章式排版）
     NotFoundView            # 404
   components/               # 复用组件（每个组件同名 CSS）
     Button / Reveal / ThemeToggle / BackLink / SectionHead / Badge
-    NoteCard / CipherChip / NoteForm / SearchForm / VerifyPanel
+    NoteCard / CipherChip / NoteForm / SearchForm / VerifyModal   # 解密核查走弹窗
     PageReveal / page-reveal-context   # 点击导航 seam
   hooks/useReducedMotion.ts # 动效降级
   lib/
@@ -61,6 +68,7 @@ src/
     motion.ts               # useInView（IntersectionObserver）
   shared/constants.ts       # 客户端 + Worker 共用常量
   worker/seal.ts            # 服务端「签名置换」密封（保持余弦、不可反推）
+  worker/seed.ts            # 初始化：README 示例留言（惰性种入，幂等）
   worker/index.ts           # Worker：/api 路由 + 静态资产
 migrations/0001_init.sql    # D1 建表
 ```

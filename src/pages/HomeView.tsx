@@ -8,6 +8,7 @@ import NoteForm from '../components/NoteForm';
 import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
 import NoteCard from '../components/NoteCard';
+import Logo from '../components/Logo';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useAdmin } from '../components/AdminProvider';
 import { useToast } from '../components/Toast';
@@ -229,12 +230,15 @@ export default function HomeView() {
       <section className="home__hero" id="top">
         <div className="home__hero-inner">
           <Reveal>
+            <Logo className="home__logo" />
+          </Reveal>
+          <Reveal delay={60}>
             <h1 className="home__title">Vec-Note</h1>
           </Reveal>
-          <Reveal delay={80} className="home__search">
+          <Reveal delay={120} className="home__search">
             <SearchForm onResults={handleResults} />
           </Reveal>
-          <Reveal delay={140}>
+          <Reveal delay={180}>
             <Button variant="solid" size="md" onClick={() => setComposing(true)}>
               发布留言 →
             </Button>

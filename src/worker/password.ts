@@ -4,7 +4,11 @@
 // 存储格式：pbkdf2$sha256$<iterations>$<salt_b64url>$<hash_b64url>
 // Worker 与 Node(测试) 环境均可运行。
 
-const PBKDF2_ITERATIONS = 150_000;
+// Cloudflare Workers 生产环境的 WebCrypto 限制 PBKDF2 迭代次数 ≤ 100000
+// （超出会抛 NotSupportedError → 500）。本地 wrangler dev 不强制该限制，
+// 因此必须在 100000 以内取值，否则部署后登录接口直接 500。
+const PBKDF2_ITERATIONS = 100_000;
+const PBKDF2_ITERATIONS_MAX = 100_000;
 const SALT_BYTES = 16;
 const KEY_BITS = 256;
 
@@ -64,6 +68,9 @@ export async function verifyPassword(password: string, stored: string): Promise<
   if (parts.length !== 5 || parts[0] !== 'pbkdf2' || parts[1] !== 'sha256') return false;
   const iterations = Number(parts[2]);
   if (!Number.isInteger(iterations) || iterations < 1) return false;
+  // 超出平台上限的历史哈希无法在校验时计算：直接视为不匹配，
+  // 避免 crypto.subtle 抛 NotSupportedError 导致 500。
+  if (iterations > PBKDF2_ITERATIONS_MAX) return false;
   let salt: Uint8Array;
   let expected: Uint8Array;
   try {

@@ -1,0 +1,33 @@
+.verify-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verify-modal .field-label {
+  margin-top: 10px;
+}
+
+.verify-modal .field-label:first-of-type {
+  margin-top: 0;
+}
+
+/* 只读密文展示：等宽断行，可选中复制 */
+.verify-modal__cipher {
+  width: 100%;
+  padding: 11px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  border: 2px dashed var(--border-soft);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.verify-modal__actions {
+  margin-top: 14px;
+}

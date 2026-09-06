@@ -1,12 +1,13 @@
-/* 轻量 toast：与站点一致的硬边框 + 无衬线微标风格，右上角悬浮 */
+/* 轻量 toast：无描边、单色极简（淡淡的面板 + 柔影），顶部居中悬浮 */
 .toast-stack {
   position: fixed;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 300; /* 高于所有 modal(200) 与 FAB */
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   pointer-events: none;
 }
@@ -16,47 +17,34 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: min(340px, calc(100vw - 40px));
-  padding: 10px 14px;
-  background: var(--bg);
+  max-width: min(380px, calc(100vw - 32px));
+  padding: 11px 18px;
+  background: color-mix(in srgb, var(--fg) 6%, var(--bg));
   color: var(--fg);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--fg) 10%, transparent);
   animation: toast-in 180ms var(--ease-out);
 }
 
 .toast__glyph {
   flex: none;
-  width: 20px;
-  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1;
+  color: var(--muted);
+}
+
+.toast__icon {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .toast__text {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.4;
-}
-
-.toast--success .toast__glyph {
-  color: var(--fg);
-}
-
-.toast--error {
-  border-color: var(--danger);
-}
-
-.toast--error .toast__glyph {
-  color: var(--danger);
 }
 
 @keyframes toast-in {
