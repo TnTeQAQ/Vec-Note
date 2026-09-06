@@ -66,14 +66,17 @@ body {
   transition: background-color 320ms ease, color 320ms ease;
 }
 
-/* Lenis smooth scroll 推荐的基础样式 */
-html.lenis,
-html.lenis body {
-  height: auto;
+/* 锚点/程序化滚动使用浏览器原生平滑滚动（#标签跳转）
+   普通滚轮滚动不受影响，原生可打断，双向平滑且稳定 */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 0px;
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 #root {

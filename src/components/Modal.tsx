@@ -40,7 +40,6 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        data-lenis-prevent
       >
         <div className="modal__head">
           <h2 className="modal__title">{title}</h2>
