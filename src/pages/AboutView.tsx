@@ -85,10 +85,12 @@ export default function AboutView() {
       <Reveal delay={120}>
         <section className="about__block">
           <h2 className="about__h2">技术栈</h2>
-          <p className="about__p">
-            React 19 + Vite + TypeScript；Cloudflare Workers + D1；<code>@noble/curves</code>
-            （BLS12-381）、<code>@noble/hashes</code>（SHA-256）；react-intersection-observer。
-          </p>
+          <ul className="about__list">
+            <li><strong>前端</strong>：React 19 + Vite + TypeScript</li>
+            <li><strong>后端 / 数据库</strong>：Cloudflare Workers + D1</li>
+            <li><strong>加密</strong>：<code>@noble/curves</code>（BLS12-381）、<code>@noble/hashes</code>（SHA-256）</li>
+            <li><strong>无限滚动</strong>：react-intersection-observer</li>
+          </ul>
         </section>
       </Reveal>
     </div>
