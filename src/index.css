@@ -156,6 +156,8 @@ img {
 textarea.field {
   resize: vertical;
   min-height: 110px;
+  max-height: 40vh; /* 限高：超出后内部滚动，防止拖得过高 */
+  overflow-y: auto;
 }
 
 /* note content stays selectable inside cards */
