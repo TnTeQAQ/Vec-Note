@@ -2,6 +2,8 @@
   "name": "vec-note",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "tnteqaq <tnteqaq@gmail.com>",
   "type": "module",
   "description": "Minimalist note board: title n-gram vectorization + BLS12-381 signature-as-ciphertext, on Cloudflare Workers + D1.",
   "scripts": {
