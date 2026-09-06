@@ -52,9 +52,13 @@ export default function HomeView() {
     requestAnimationFrame(() => {
       const el = boardRef.current;
       if (!el) return;
+      const lenis = lenisRef.current;
+      // 搜索结果/新留言会改变页面高度；先让 Lenis 重算可滚动上限，
+      // 否则 scrollTo 会把目标钳制在旧（短内容时的）上限，只滚半屏。
+      lenis?.resize();
       const top = el.getBoundingClientRect().top + window.scrollY - 20;
-      if (lenisRef.current) {
-        lenisRef.current.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
+      if (lenis) {
+        lenis.scrollTo(top, { duration: GLIDE_SECONDS, easing: easeOut });
       } else {
         window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
       }
