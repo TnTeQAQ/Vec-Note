@@ -88,14 +88,7 @@ export default function AboutView() {
             <li>API 永不返回向量字段（只给相似度排名和匹配数）。</li>
           </ul>
 
-          <h3 className="about__h3">4. 内容渲染与安全（Markdown + DOMPurify）</h3>
-          <ul className="about__list">
-            <li>内容明文存储，用 markdown-it 渲染，再过 DOMPurify <strong>白名单</strong>净化：粗斜体、列表、标题、代码、链接和 <code>&lt;span style=color&gt;</code> 字体颜色都放行；</li>
-            <li>图片只允许 <code>http(s)</code> 和内联位图（png/jpeg/gif/webp/avif/bmp），pdf/svg/zip 这类一律拒掉；</li>
-            <li><code>&lt;script&gt;</code>、事件属性、<code>javascript:</code>、按钮/表单/iframe 全部剥掉。</li>
-          </ul>
-
-          <h3 className="about__h3">5. 工程细节</h3>
+          <h3 className="about__h3">4. 工程细节</h3>
           <ul className="about__list">
             <li>自研 pageId 单页路由（history + localStorage 恢复，URL 保持干净）；</li>
             <li>留言流和搜索结果都走分页无限滚动（react-intersection-observer）；</li>
@@ -121,10 +114,9 @@ export default function AboutView() {
         <section className="about__block">
           <h2 className="about__h2">技术栈</h2>
           <p className="about__p">
-            前端 React 19 + Vite + TypeScript（向量化、签名、富文本渲染全在浏览器）；
+            前端 React 19 + Vite + TypeScript（向量化、签名全在浏览器）；
             后端 Cloudflare Workers + D1；加密 <code>@noble/curves</code>（BLS12-381）和{' '}
-            <code>@noble/hashes</code>（SHA-256）；渲染 markdown-it + DOMPurify；
-            无限滚动 react-intersection-observer。
+            <code>@noble/hashes</code>（SHA-256）；无限滚动 react-intersection-observer。
           </p>
         </section>
       </Reveal>
