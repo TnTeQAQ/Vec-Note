@@ -1,40 +1,77 @@
-.home {
-  width: min(var(--maxw), 100%);
-  margin: 0 auto;
-  padding: 32px 24px 80px;
-}
-
-.home__head {
+.home__hero {
+  position: relative;
+  min-height: 100svh;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
+  padding: 40px 24px;
+  /* 点阵网格背景，呼应「向量空间」 */
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--fg) 22%, transparent) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 26px 26px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 30%, transparent 78%);
+}
+
+.home__hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: min(640px, 100%);
 }
 
 .home__title {
   font-family: var(--sans);
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
   font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-align: center;
 }
 
 .home__search {
-  margin-top: 20px;
+  width: 100%;
 }
 
-.home__list {
-  margin-top: 24px;
+.home__scroll-hint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  color: var(--muted);
+  animation: home-hint-bob 2.2s ease-in-out infinite;
 }
 
-.home__cards {
-  display: flex;
-  flex-direction: column;
+@keyframes home-hint-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, 6px);
+    opacity: 1;
+  }
 }
 
-/* 末条不再画分隔线 */
-.home__cards > :last-child .note {
-  border-bottom: none;
+@media (prefers-reduced-motion: reduce) {
+  .home__scroll-hint {
+    animation: none;
+  }
+}
+
+.home__board {
+  width: min(var(--maxw), 100%);
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  min-height: 70svh;
 }
 
 .home__query {
@@ -65,6 +102,16 @@
 
 .home__clear:hover {
   color: var(--fg);
+}
+
+.home__cards {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 末条不再画分隔线 */
+.home__cards > :last-child .note {
+  border-bottom: none;
 }
 
 .home__empty {
