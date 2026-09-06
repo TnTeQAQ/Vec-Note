@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import Lenis from 'lenis';
-import Snap from 'lenis/snap';
 import type { EasingFunction } from 'lenis';
 import { listNotes, type Note } from '../lib/api';
 import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
@@ -26,7 +25,6 @@ export default function HomeView() {
   const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
   const startReveal = usePageReveal();
   const reduced = useReducedMotion();
-  const heroRef = useRef<HTMLElement>(null);
   const boardRef = useRef<HTMLElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -50,23 +48,33 @@ export default function HomeView() {
     };
   }, []);
 
-  // 滚轮翻屏：交给成熟库 Lenis(smooth) + Snap(type:'lock')。
-  // 搜索屏向下一滚自动滑到「最新留言」，留言区顶部向上一滚滑回搜索框；
-  // 吸附动画期间锁定输入防抖动，留言区深处自由滚动不受打扰。
+  // 滚轮翻屏：Lenis 负责全页平滑滚动与翻屏动画（不手写任何动画）；
+  // 这里只做「翻屏意图」判定，动画委托 lenis.scrollTo——
+  // 无 debounce、无锁定，每一次滚轮都立即响应，来回可无限次平滑切换。
   useEffect(() => {
     if (reduced) return; // 减弱动效：完全原生滚动
     const lenis = new Lenis({ autoRaf: true });
-    const snap = new Snap(lenis, {
-      type: 'lock',
-      duration: 0.85,
-      easing: easeOut,
-    });
-    if (heroRef.current) snap.addElement(heroRef.current);
-    if (boardRef.current) snap.addElement(boardRef.current);
     lenisRef.current = lenis;
+
+    const onWheel = (event: WheelEvent) => {
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      const down = event.deltaY > 0;
+      if (down && y < vh * 0.5) {
+        // 搜索屏下滑 → 滑到「最新留言」
+        const el = boardRef.current;
+        const top = el ? el.getBoundingClientRect().top + y : vh;
+        lenis.scrollTo(top, { duration: 0.8, easing: easeOut });
+      } else if (!down && y > vh * 0.5 && y < vh * 1.4) {
+        // 留言区顶部上滑 → 回搜索屏
+        lenis.scrollTo(0, { duration: 0.8, easing: easeOut });
+      }
+      // 其余位置：交给 lenis 原生平滑滚动
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
     return () => {
+      window.removeEventListener('wheel', onWheel);
       lenisRef.current = null;
-      snap.destroy();
       lenis.destroy();
     };
   }, [reduced]);
@@ -105,7 +113,7 @@ export default function HomeView() {
 
   return (
     <div className="home">
-      <section className="home__hero" ref={heroRef}>
+      <section className="home__hero">
         <div className="home__hero-inner">
           <Reveal>
             <h1 className="home__title">Vec-Note</h1>
