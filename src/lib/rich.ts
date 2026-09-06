@@ -16,12 +16,27 @@ const ALLOWED_TAGS = [
   'p', 'blockquote', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'hr', 'pre',
   // 链接（http(s)/mailto，由 DOMPurify 默认协议白名单把关）
   'a',
+  // 图片（src 在下方的 hook 里二次校验）
+  'img',
 ];
-const ALLOWED_ATTR = ['style', 'color', 'href', 'target', 'rel'];
+const ALLOWED_ATTR = ['style', 'color', 'href', 'target', 'rel', 'src', 'alt', 'title', 'width', 'height'];
 
 // 样式只保留颜色类属性，其余一律丢弃
 const ALLOWED_STYLE_PROPS = new Set(['color', 'background-color']);
 const UNSAFE_STYLE = /url\s*\(|expression\s*\(|javascript:|@import/i;
+
+// 图片只允许 http(s) 与内联位图（png/jpeg/gif/webp/avif/bmp）；
+// 拒绝 pdf/svg/zip 等任意文件，杜绝用图片语法塞非图片内容。
+const RASTER_DATA = /^data:image\/(?:png|jpe?g|gif|webp|avif|bmp);/i;
+const NON_RASTER_EXT = /\.(?:pdf|svg|zip|rar|7z|tar|gz|exe|dmg|iso|js|mjs|css|html?|php|asp|json|xml|txt|md|mp4|webm|mov|mp3)$/i;
+function isSafeImageSrc(src: string): boolean {
+  if (/^(?:https?:)?\/\//i.test(src)) {
+    // http(s)：路径尾部显式非位图扩展名一律拒绝
+    const path = src.split(/[?#]/)[0] ?? '';
+    return !NON_RASTER_EXT.test(path);
+  }
+  return RASTER_DATA.test(src);
+}
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   if (node.tagName === 'SPAN' || node.tagName === 'FONT') {
@@ -46,13 +61,18 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noopener noreferrer');
   }
+  if (node.tagName === 'IMG') {
+    // 二次校验图片源：不安全的 src 直接摘掉（同时事件属性早已不在白名单内）
+    const src = node.getAttribute('src') ?? '';
+    if (!isSafeImageSrc(src)) node.removeAttribute('src');
+  }
 });
 
 /**
  * 把用户留言内容渲染为「安全 HTML」：
- * 支持 Markdown + <b>/<i>/<u>/<s>/<code>/<pre>/列表/标题/链接/换行，
- * 以及 <span style="color:…"> 字体颜色；
- * 脚本、事件属性、按钮/表单/图片/iframe 等交互元素一律剔除。
+ * 支持 Markdown + <b>/<i>/<u>/<s>/<code>/<pre>/列表/标题/链接/换行、
+ * <span style="color:…"> 字体颜色，以及图片（http(s)/位图 data:）；
+ * 脚本、事件属性、按钮/表单/iframe、pdf/svg 等一律剔除。
  */
 export function renderRichText(markdown: string): string {
   const html = md.render(markdown);

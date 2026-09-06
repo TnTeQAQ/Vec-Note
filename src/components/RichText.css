@@ -81,3 +81,12 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+.rich img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.6em auto;
+  border: 2px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
