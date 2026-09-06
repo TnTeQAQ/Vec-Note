@@ -61,14 +61,17 @@ export default function NoteCard({ note, verify = false }: { note: Note; verify?
         <span className="note__time">{relTime(note.created_at)}</span>
       </div>
 
-      <div className="note__content selectable" ref={contentRef}>
+      <div
+        className={`note__content selectable${overflowing ? ' note__content--clipped' : ''}`}
+        ref={contentRef}
+      >
         <RichText markdown={note.content} />
       </div>
 
       {overflowing && (
         <div className="note__expand">
           <button type="button" className="note__expand-btn" onClick={() => setOpenDetail(true)}>
-            … 查看全文
+            查看全文
           </button>
         </div>
       )}

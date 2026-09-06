@@ -2,10 +2,13 @@
   padding: 16px 6px 18px;
   border-bottom: 2px solid var(--border-soft);
   transition: background-color 160ms ease;
+  /* 截断遮罩淡出的目标色（跟随行背景） */
+  --fade-to: var(--bg);
 }
 
 .note:hover {
   background: color-mix(in srgb, var(--border-soft) 40%, transparent);
+  --fade-to: color-mix(in srgb, var(--border-soft) 40%, var(--bg));
 }
 
 .note__head {
@@ -62,8 +65,21 @@
   word-break: break-word;
 }
 
+/* 仅当内容溢出（有「查看全文」）时才显示底部遮罩 */
+.note__content--clipped::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.7em;
+  background: linear-gradient(to bottom, transparent, var(--fade-to));
+  pointer-events: none;
+}
+
 .note__expand {
   margin-top: 6px;
+  text-align: center;
 }
 
 .note__expand-btn {
