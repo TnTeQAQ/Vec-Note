@@ -34,13 +34,15 @@
   transition: color 180ms ease;
 }
 
-.note-card__meta-right {
+/* 卡片顶行：密文指纹居左，「去验证」推到右上角 */
+.note-card__top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .note-card__verify {
+  margin-left: auto;
   border: 0;
   background: none;
   padding: 0;
