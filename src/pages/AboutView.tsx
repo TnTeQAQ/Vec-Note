@@ -8,7 +8,7 @@ import './AboutView.css';
 export default function AboutView() {
   return (
     <div className="about selectable">
-      <BackLink />
+      <BackLink to="home" />
       <Reveal>
         <h1 className="about__title">关于 Vec-Note</h1>
         <p className="about__lede">
