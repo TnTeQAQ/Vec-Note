@@ -11,15 +11,4 @@
   font-size: 12px;
   letter-spacing: 0.04em;
   color: var(--chip-c);
-  cursor: copy;
-  transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
-}
-
-.cipher-chip:hover {
-  background: var(--chip-c);
-  color: var(--bg);
-}
-
-.cipher-chip:active {
-  transform: scale(0.96);
 }
