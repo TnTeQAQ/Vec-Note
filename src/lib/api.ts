@@ -3,6 +3,10 @@ export interface Note {
   created_at: number;
   ciphertext: string;
   content: string;
+  /** 是否置顶（服务端返回；旧缓存可能缺失，作可选） */
+  pinned?: boolean;
+  /** 置顶时刻（毫秒）；未置顶为 null */
+  pinned_at?: number | null;
 }
 
 export interface SearchResult extends Note {
@@ -97,4 +101,27 @@ export async function adminDeleteNote(token: string, id: string): Promise<{ ok: 
     throw err;
   }
   return data as { ok: boolean };
+}
+
+/** 管理员置顶 / 取消置顶一条留言；返回服务端确认后的置顶状态。 */
+export async function adminPinNote(
+  token: string,
+  id: string,
+  pinned: boolean,
+): Promise<{ ok: boolean; pinned: boolean; pinned_at: number | null }> {
+  const res = await fetch(`/api/notes/${encodeURIComponent(id)}/pin`, {
+    method: 'PATCH',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ pinned }),
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    const err = new Error(typeof data.error === 'string' ? data.error : `HTTP ${res.status}`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; pinned: boolean; pinned_at: number | null };
 }

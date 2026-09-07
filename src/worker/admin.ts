@@ -170,6 +170,35 @@ export async function deleteNoteAsAdmin(
   return json({ ok: true });
 }
 
+/** 置顶 / 取消置顶一条留言（需管理员会话）。pinned_at 非空即置顶。 */
+export async function setNotePinAsAdmin(
+  request: Request,
+  env: EnvWithDb,
+  noteId: string,
+): Promise<Response> {
+  const token = bearerToken(request);
+  if (!(await hasValidSession(env, token))) {
+    return json({ error: '未登录或会话已过期', code: 'unauthorized' }, 401);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return json({ error: 'invalid JSON body' }, 400);
+  }
+  if (typeof body.pinned !== 'boolean') {
+    return json({ error: 'pinned must be a boolean' }, 400);
+  }
+
+  const pinned_at = body.pinned ? Date.now() : null;
+  const res = await env.DB.prepare('UPDATE notes SET pinned_at = ? WHERE id = ?')
+    .bind(pinned_at, noteId)
+    .run();
+  if (res.meta.changes === 0) return json({ error: '留言不存在或已被删除' }, 404);
+  return json({ ok: true, pinned: body.pinned, pinned_at });
+}
+
 function clientIpOf(request: Request): string {
   const cf = request.headers.get('CF-Connecting-IP');
   if (cf) return cf;

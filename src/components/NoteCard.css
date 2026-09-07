@@ -27,6 +27,19 @@
   color: var(--muted);
 }
 
+/* 置顶徽标：对所有访客可见（列表 + 详情），纯图标、无描边 */
+.note__pin-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  user-select: none;
+}
+
+.note__pin-badge svg {
+  display: block;
+}
+
 .note__fill {
   flex: 1;
 }
@@ -55,6 +68,32 @@
 
 .note__verify:hover {
   color: var(--fg);
+}
+
+/* 管理模式下的置顶入口（文字切换，风格同 verify） */
+.note__pin {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+
+.note__pin:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.note__pin:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* 管理模式下的删除入口（危险色） */

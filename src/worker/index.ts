@@ -13,6 +13,7 @@ import {
   logoutAdmin,
   changeAdminPassword,
   deleteNoteAsAdmin,
+  setNotePinAsAdmin,
 } from './admin';
 
 interface Env {
@@ -124,11 +125,18 @@ async function listNotes(_request: Request, env: Env, url: URL): Promise<Respons
   if (!Number.isFinite(offset) || offset < 0) offset = 0;
 
   // 多取一行判断是否还有下一页（hasMore）
+  // 排序：置顶优先（pinned_at DESC，SQLite 下 NULL 排最后），同组内按创建时间倒序
   const { results } = await env.DB.prepare(
-    'SELECT id, created_at, content, title_ct FROM notes ORDER BY created_at DESC LIMIT ? OFFSET ?',
+    'SELECT id, created_at, content, title_ct, pinned_at FROM notes ORDER BY pinned_at DESC, created_at DESC LIMIT ? OFFSET ?',
   )
     .bind(limit + 1, offset)
-    .all<{ id: string; created_at: number; content: string; title_ct: string }>();
+    .all<{
+      id: string;
+      created_at: number;
+      content: string;
+      title_ct: string;
+      pinned_at: number | null;
+    }>();
 
   const rows = results ?? [];
   const hasMore = rows.length > limit;
@@ -137,6 +145,8 @@ async function listNotes(_request: Request, env: Env, url: URL): Promise<Respons
     created_at: r.created_at,
     ciphertext: r.title_ct,
     content: r.content,
+    pinned: r.pinned_at !== null,
+    pinned_at: r.pinned_at,
   }));
   return json({ notes, hasMore });
 }
@@ -157,8 +167,15 @@ async function search(request: Request, env: Env): Promise<Response> {
   if (qNorm === 0) return json({ results: [], total: 0, hasMore: false });
 
   const { results } = await env.DB.prepare(
-    'SELECT id, created_at, content, title_ct, sealed_vector FROM notes',
-  ).all<{ id: string; created_at: number; content: string; title_ct: string; sealed_vector: string }>();
+    'SELECT id, created_at, content, title_ct, sealed_vector, pinned_at FROM notes',
+  ).all<{
+    id: string;
+    created_at: number;
+    content: string;
+    title_ct: string;
+    sealed_vector: string;
+    pinned_at: number | null;
+  }>();
 
   // 请求内分页参数（默认每页 20）
   const rawLimit = typeof body.limit === 'number' ? body.limit : 20;
@@ -169,7 +186,15 @@ async function search(request: Request, env: Env): Promise<Response> {
   let offset = Math.floor(rawOffset);
   if (!Number.isFinite(offset) || offset < 0) offset = 0;
 
-  const ranked: Array<{ id: string; created_at: number; ciphertext: string; content: string; score: number }> = [];
+  const ranked: Array<{
+    id: string;
+    created_at: number;
+    ciphertext: string;
+    content: string;
+    score: number;
+    pinned: boolean;
+    pinned_at: number | null;
+  }> = [];
   for (const r of results ?? []) {
     let parsed: unknown;
     try {
@@ -190,22 +215,29 @@ async function search(request: Request, env: Env): Promise<Response> {
         ciphertext: r.title_ct,
         content: r.content,
         score,
+        pinned: r.pinned_at !== null,
+        pinned_at: r.pinned_at,
       });
     }
   }
 
-  ranked.sort((a, b) => b.score - a.score);
+  // 排序：置顶优先，组内按相似度倒序
+  ranked.sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.score - a.score);
   // 总命中数 = 高于阈值且排序后的全部结果；接口按 offset/limit 分页返回。
   const total = ranked.length;
-  const page = ranked.slice(offset, offset + limit).map(({ id, created_at, ciphertext, content, score }) => ({
-    id,
-    created_at,
-    ciphertext,
-    content,
-    // 余弦相似度（0..1）：密封是正交变换、精确保持余弦，前端展示为百分比。
-    // 返回的是分数而非向量本身，sealed_vector 仍然不出服务端。
-    similarity: Number(Math.min(Math.max(score, 0), 1).toFixed(4)),
-  }));
+  const page = ranked
+    .slice(offset, offset + limit)
+    .map(({ id, created_at, ciphertext, content, score, pinned, pinned_at }) => ({
+      id,
+      created_at,
+      ciphertext,
+      content,
+      pinned,
+      pinned_at,
+      // 余弦相似度（0..1）：密封是正交变换、精确保持余弦，前端展示为百分比。
+      // 返回的是分数而非向量本身，sealed_vector 仍然不出服务端。
+      similarity: Number(Math.min(Math.max(score, 0), 1).toFixed(4)),
+    }));
   return json({ results: page, total, hasMore: offset + page.length < total });
 }
 
@@ -230,7 +262,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     return search(request, env);
   }
 
-  // 留言详情操作（仅管理员删除）
+  // 留言详情操作（仅管理员删除/置顶）
+  const notePinMatch = /^\/api\/notes\/([^/]+)\/pin$/.exec(p);
+  if (notePinMatch && request.method === 'PATCH') {
+    return setNotePinAsAdmin(request, env, notePinMatch[1]);
+  }
   const noteMatch = /^\/api\/notes\/([^/]+)$/.exec(p);
   if (noteMatch && request.method === 'DELETE') {
     return deleteNoteAsAdmin(request, env, noteMatch[1]);

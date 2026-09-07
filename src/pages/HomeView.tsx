@@ -17,11 +17,21 @@ import './HomeView.css';
 const PAGE_SIZE = 10;
 
 /**
+ * 置顶优先的稳定排序：置顶项在前（组内保持服务端顺序：置顶时间倒序/相似度倒序），
+ * 未置顶项在后（按时间倒序/相似度倒序）。与服务端 listNotes/search 排序一致。
+ */
+function sortPinnedFirst<T extends Note>(list: T[]): T[] {
+  const copy = [...list];
+  copy.sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
+  return copy;
+}
+
+/**
  * 论坛式主页，双屏结构（锚点导航，无自定义滚动逻辑）：
  * - 第一屏（#top）：搜索框 + 发布入口（弹窗表单）；
  * - 第二屏（#notes）：最新留言流 / 搜索结果。
  * 跳转用原生 # 锚点 + 浏览器平滑滚动；列表向下滚动时自动加载下一页。
- * 管理模式（登录后）：卡片显示删除入口，确认后从当前列表/搜索结果移除。
+ * 管理模式（登录后）：卡片显示删除 / 置顶入口，确认后从当前列表/搜索结果移除。
  */
 export default function HomeView() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -31,12 +41,14 @@ export default function HomeView() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
-  const { isAdmin, deleteNote } = useAdmin();
+  const { isAdmin, deleteNote, pinNote } = useAdmin();
   const { toast } = useToast();
 
   // 删除确认
   const [deleting, setDeleting] = useState<Note | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
+  // 正在置顶/取消置顶的留言 id（忙碌指示）
+  const [pinningId, setPinningId] = useState<string | null>(null);
   const reduced = useReducedMotion();
   const startReveal = usePageReveal();
   const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
@@ -201,6 +213,43 @@ export default function HomeView() {
     }
   };
 
+  /** 本地同步置顶状态：更新标记并置顶优先重排（列表与搜索结果） */
+  const applyPinLocal = (id: string, pinned: boolean, pinned_at: number | null) => {
+    setNotes((prev) =>
+      sortPinnedFirst(prev.map((n) => (n.id === id ? { ...n, pinned, pinned_at } : n))),
+    );
+    setSearch((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        results: sortPinnedFirst(
+          prev.results.map((r) => (r.id === id ? { ...r, pinned, pinned_at } : r)),
+        ),
+      };
+    });
+  };
+
+  /** 置顶 / 取消置顶（管理员） */
+  const handlePin = async (note: Note) => {
+    if (pinningId) return;
+    const next = !note.pinned;
+    setPinningId(note.id);
+    try {
+      const res = await pinNote(note.id, next);
+      applyPinLocal(note.id, res.pinned, res.pinned_at);
+      toast(res.pinned ? '已置顶' : '已取消置顶', 'success');
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      if (status === 401) {
+        toast('登录已过期，请重新进入管理', 'error');
+      } else {
+        toast(err instanceof Error ? err.message : String(err), 'error');
+      }
+    } finally {
+      setPinningId(null);
+    }
+  };
+
   const goAbout = (e: React.MouseEvent<HTMLElement>) => {
     if (!isPlainClick(e)) return;
     e.preventDefault();
@@ -211,7 +260,14 @@ export default function HomeView() {
     <div className="home__cards">
       {list.map((note, index) => (
         <Reveal key={note.id} delay={Math.min(index, 6) * 24}>
-          <NoteCard note={note} verify admin={isAdmin} onDelete={setDeleting} />
+          <NoteCard
+            note={note}
+            verify
+            admin={isAdmin}
+            onDelete={setDeleting}
+            onPin={handlePin}
+            pinBusy={pinningId === note.id}
+          />
         </Reveal>
       ))}
     </div>

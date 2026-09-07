@@ -16,6 +16,7 @@ import {
   adminLogout,
   adminChangePassword,
   adminDeleteNote,
+  adminPinNote,
   type AdminSession,
 } from '../lib/api';
 import './AdminProvider.css';
@@ -39,6 +40,11 @@ export interface AdminContextValue {
   changePassword: (current: string, next: string) => Promise<void>;
   /** 删除一条留言（错误会 throw） */
   deleteNote: (id: string) => Promise<void>;
+  /** 置顶 / 取消置顶一条留言（错误会 throw）；返回服务端确认后的置顶状态 */
+  pinNote: (
+    id: string,
+    pinned: boolean,
+  ) => Promise<{ ok: boolean; pinned: boolean; pinned_at: number | null }>;
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
@@ -138,6 +144,22 @@ export default function AdminProvider({ children }: { children: ReactNode }) {
     [session],
   );
 
+  const pinNote = useCallback(
+    async (id: string, pinned: boolean) => {
+      if (!session) throw new Error('未登录');
+      try {
+        return await adminPinNote(session.token, id, pinned);
+      } catch (err) {
+        if ((err as { status?: number }).status === 401) {
+          // 会话失效 → 退出管理模式
+          setSession(null);
+        }
+        throw err;
+      }
+    },
+    [session],
+  );
+
   /** 提交修改密码：成功/失败均弹 toast，成功后收起面板 */
   const submitChangePassword = async (current: string, next: string) => {
     setBusy(true);
@@ -159,8 +181,17 @@ export default function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo<AdminContextValue>(
-    () => ({ isAdmin, openGate, closeDialog, login, logout, changePassword, deleteNote }),
-    [isAdmin, openGate, closeDialog, login, logout, changePassword, deleteNote],
+    () => ({
+      isAdmin,
+      openGate,
+      closeDialog,
+      login,
+      logout,
+      changePassword,
+      deleteNote,
+      pinNote,
+    }),
+    [isAdmin, openGate, closeDialog, login, logout, changePassword, deleteNote, pinNote],
   );
 
   return (

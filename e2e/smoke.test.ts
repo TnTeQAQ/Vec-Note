@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { embed } from '../src/lib/embed';
 import { signTitle, verifyTitle } from '../src/lib/crypto';
+import { SEED_NOTE_ID } from '../src/worker/seed';
 
 // 端到端冒烟测试：需要本地已运行 `wrangler dev`（且已 `pnpm db:migrate:local`）。
 // 仅在手动执行 `npx vitest run e2e/smoke.test.ts` 时运行，不在 `pnpm test` 默认范围内。
@@ -144,6 +145,65 @@ describe('e2e smoke (live wrangler dev)', () => {
         headers: auth(token2),
       });
       expect(stale.status).toBe(401);
+    },
+    30000,
+  );
+
+  it(
+    'admin: 置顶 README 种子留言 → 列表置顶优先 → 取消置顶 → 状态恢复',
+    async () => {
+      // 用固定存在的种子留言（最旧留言）做对象：置顶后必须排第一，可确定性验证排序。
+      // 不新建留言，避免触发同一 IP 每分钟一条的发布限流。
+      const auth = (token: string) => ({ authorization: `Bearer ${token}` });
+
+      // 未登录 PATCH → 401
+      const anon = await fetch(`${BASE}/api/notes/${SEED_NOTE_ID}/pin`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ pinned: true }),
+      });
+      expect(anon.status).toBe(401);
+
+      const login = await fetch(`${BASE}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ password: 'admin' }),
+      });
+      expect(login.status).toBe(200);
+      const { token } = (await login.json()) as { token: string };
+
+      const pin = await fetch(`${BASE}/api/notes/${SEED_NOTE_ID}/pin`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', ...auth(token) },
+        body: JSON.stringify({ pinned: true }),
+      });
+      expect(pin.status).toBe(200);
+      const pinBody = (await pin.json()) as { pinned: boolean; pinned_at: number | null };
+      expect(pinBody.pinned).toBe(true);
+      expect(typeof pinBody.pinned_at).toBe('number');
+
+      // 置顶后 README 排第一且带置顶标记
+      const pinnedList = (await (await fetch(`${BASE}/api/notes?limit=100`)).json()) as {
+        notes: { id: string; pinned: boolean }[];
+      };
+      expect(pinnedList.notes[0].id).toBe(SEED_NOTE_ID);
+      expect(pinnedList.notes[0].pinned).toBe(true);
+
+      // 取消置顶 → 状态恢复
+      const unpin = await fetch(`${BASE}/api/notes/${SEED_NOTE_ID}/pin`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', ...auth(token) },
+        body: JSON.stringify({ pinned: false }),
+      });
+      expect(unpin.status).toBe(200);
+      const unpinBody = (await unpin.json()) as { pinned: boolean; pinned_at: number | null };
+      expect(unpinBody.pinned).toBe(false);
+      expect(unpinBody.pinned_at).toBeNull();
+
+      const restored = (await (await fetch(`${BASE}/api/notes?limit=100`)).json()) as {
+        notes: { id: string; pinned: boolean }[];
+      };
+      expect(restored.notes.find((n) => n.id === SEED_NOTE_ID)?.pinned).toBe(false);
     },
     30000,
   );
