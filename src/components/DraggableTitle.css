@@ -1,0 +1,14 @@
+/* 可拖拽标题：抓手光标 + 禁止触摸滚动/选中文本；提升合成层让移动更顺滑 */
+.draggable-title {
+  position: relative;
+  z-index: 100; /* 拖动时压在搜索框 / 按钮等兄弟元素之上 */
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+
+.draggable-title.is-dragging {
+  cursor: grabbing;
+}

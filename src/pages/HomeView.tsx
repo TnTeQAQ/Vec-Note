@@ -4,6 +4,7 @@ import { listNotes, searchNotes, type Note } from '../lib/api';
 import { isPlainClick, usePageReveal } from '../components/page-reveal-context';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import DraggableTitle from '../components/DraggableTitle';
 import NoteForm from '../components/NoteForm';
 import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
@@ -285,7 +286,7 @@ export default function HomeView() {
       <section className="home__hero" id="top">
         <div className="home__hero-inner">
           <Reveal>
-            <h1 className="home__title">Vec-Note</h1>
+            <DraggableTitle />
           </Reveal>
           <Reveal delay={80} className="home__search">
             <SearchForm onResults={handleResults} />
