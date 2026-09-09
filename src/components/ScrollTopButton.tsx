@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useReducedMotion } from '../hooks/useReducedMotion';
 
 /**
  * 回到顶部：滚动超过一屏后显示在右下角（与主题切换同组同款样式）。
+ * 始终平滑滚动——回顶是导航交互，不被 prefers-reduced-motion 降级为瞬切。
  */
 export default function ScrollTopButton() {
   const [past, setPast] = useState(false);
-  const reduced = useReducedMotion();
 
   useEffect(() => {
     const onScroll = () => setPast(window.scrollY > window.innerHeight * 0.7);
@@ -21,7 +20,7 @@ export default function ScrollTopButton() {
     <button
       type="button"
       className="fab-round"
-      onClick={() => window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       title="回到顶部"
       aria-label="回到顶部"
     >

@@ -9,7 +9,6 @@ import NoteForm from '../components/NoteForm';
 import Reveal from '../components/Reveal';
 import SearchForm, { type SearchOutcome } from '../components/SearchForm';
 import NoteCard from '../components/NoteCard';
-import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useAdmin } from '../components/AdminProvider';
 import { useToast } from '../components/Toast';
 import './HomeView.css';
@@ -50,7 +49,6 @@ export default function HomeView() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   // 正在置顶/取消置顶的留言 id（忙碌指示）
   const [pinningId, setPinningId] = useState<string | null>(null);
-  const reduced = useReducedMotion();
   const startReveal = usePageReveal();
   const offsetRef = useRef(0); // 留言流已加载条数（下一页的 offset）
 
@@ -72,15 +70,14 @@ export default function HomeView() {
     void load();
   }, [load]);
 
-  // 原生锚点跳转（配合 html scroll-behavior: smooth）
-  const scrollToId = useCallback(
-    (id: string) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-    },
-    [reduced],
-  );
+  // 原生锚点跳转（配合 html scroll-behavior: smooth）。
+  // 滚动定位是核心导航交互，始终保持平滑——不跟随 prefers-reduced-motion
+  // 退化为瞬切（该媒体查询只用于装饰性入场动画）。
+  const scrollToId = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   // 滚轮一屏切换（无状态意图判断，动画交给浏览器原生 smooth）：
   // 首页向下滚动 → 自动定位到评论区（#notes）；
@@ -96,15 +93,15 @@ export default function HomeView() {
       if (down && y < vh * 0.5) {
         e.preventDefault();
         const el = document.getElementById('notes');
-        if (el) el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else if (!down && y > vh * 0.5 && y < vh * 1.5) {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
-  }, [reduced]);
+  }, []);
 
   // 无限滚动：哨兵进入视口（提前 600px）→ 加载当前列表的下一页。
   // 搜索结果与留言流互斥出现，共用一个哨兵；搜索复用同一查询向量翻页。

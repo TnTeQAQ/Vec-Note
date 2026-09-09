@@ -66,17 +66,14 @@ body {
   transition: background-color 320ms ease, color 320ms ease;
 }
 
-/* 锚点/程序化滚动使用浏览器原生平滑滚动（#标签跳转）
-   普通滚轮滚动不受影响，原生可打断，双向平滑且稳定 */
+/* 锚点/程序化滚动使用浏览器原生平滑滚动（#标签跳转）。
+   普通滚轮滚动不受影响，原生可打断，双向平滑且稳定。
+   注意：滚动定位是核心导航交互而非装饰动效，即便系统开启
+   “减少动态效果”也保持平滑（prefers-reduced-motion 只作用于
+   入场/装饰动画，见各组件）。 */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 0px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
 }
 
 /* 主题切换瞬间禁用所有过渡，避免成千上万节点同时做颜色过渡导致卡顿 */
