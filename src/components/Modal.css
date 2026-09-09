@@ -6,8 +6,19 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: color-mix(in srgb, var(--fg) 45%, transparent);
+  /* 遮罩两主题统一：深色纱 + 毛玻璃虚化背景（Material 3 / Apple 同款手法）。
+     不随 --fg 翻白，暗色下靠虚化与压暗形成景深，聚焦弹窗而不发灰。 */
+  background: rgba(8, 6, 13, 0.5);
   animation: modal-fade 160ms ease;
+}
+
+/* 支持 backdrop-filter 的环境再叠加毛玻璃（渐进增强；不支持时退化为纯深色纱） */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .modal {
+    background: rgba(8, 6, 13, 0.38);
+    -webkit-backdrop-filter: blur(6px) saturate(1.1);
+    backdrop-filter: blur(6px) saturate(1.1);
+  }
 }
 
 .modal__panel {
@@ -22,6 +33,15 @@
   padding: 22px 24px;
   box-shadow: 0 18px 50px color-mix(in srgb, var(--fg) 30%, transparent);
   animation: modal-pop 200ms var(--ease-out);
+}
+
+/* 暗色模式：面板与页面同为深色，靠一圈半透明亮描边 + 更深的阴影分层
+   （GitHub Primer / Linear 暗色弹窗的常见处理） */
+:root[data-theme='dark'] .modal__panel {
+  border: 1px solid rgba(242, 240, 245, 0.12);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* 长文详情弹窗：更宽更高 */
