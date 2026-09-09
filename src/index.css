@@ -1,3 +1,25 @@
+/*
+ * 自托管 Montserrat（仅拉丁子集 700/900，约 36KB woff2）。
+ * font-display: optional —— 字体未就绪时本帧直接用回退字体渲染、之后不切换，
+ * 配合 index.html 的 preload 彻底消除首屏「系统字体→Montserrat」的闪烁（FOUT）；
+ * 已缓存后（及本地/CDN 低延迟首访）第一帧即为 Montserrat。
+ * 其它字重沿用浏览器就近匹配：600→700、800→900。
+ */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url('/fonts/montserrat-latin-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 900;
+  font-display: optional;
+  src: url('/fonts/montserrat-latin-900.woff2') format('woff2');
+}
+
 :root {
   --bg: #ffffff;
   --fg: #08060d;

@@ -4,11 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <!-- 首屏标题/按钮所用 Montserrat（仅拉丁 700/900）：随文档预加载，
+         配合 font-display: optional 消除字体替换闪烁 -->
+    <link
+      rel="preload"
+      href="/fonts/montserrat-latin-900.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/montserrat-latin-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!--
-      SEO 模板：%VEC_*% 占位符由 Cloudflare Worker 按请求路径/域名在响应时替换
-      （src/worker/seo.ts）。首页默认值直接写好，保证未经 Worker 的环境（如
-      vite preview）也有完整 meta；客户端 useSeo 在 hydrate 后再次同步。
+      SEO template: the VEC_ placeholders below are replaced by the Cloudflare
+      Worker per request path/host (src/worker/seo.ts). The client-side useSeo
+      hook re-syncs these tags after hydration.
     -->
     <title>%VEC_TITLE%</title>
     <meta name="robots" content="index,follow" />

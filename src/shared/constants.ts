@@ -1,6 +1,9 @@
 // 客户端与 Worker 共用的常量（单一事实来源）。
 export const VECTOR_DIM = 1024;
 export const LIST_LIMIT = 20;
+// 发留言限流：同一 IP 在 RATE_LIMIT_WINDOW_MS 固定窗口内最多发送 RATE_LIMIT_MAX_POSTS 条
+export const RATE_LIMIT_WINDOW_MS = 60_000;
+export const RATE_LIMIT_MAX_POSTS = 5;
 // 留言内容上限（后端强制校验）：
 // 约可容纳一篇小型文章（参考 11.9k 字符的博客长文），单条 ≈16KB，对 D1 无压力
 export const CONTENT_MAX_LENGTH = 16000;

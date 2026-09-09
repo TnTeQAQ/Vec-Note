@@ -5,6 +5,8 @@ import {
   CONTENT_MAX_LENGTH,
   SIMILARITY_EPSILON,
   MIN_SHARED_SLOTS,
+  RATE_LIMIT_WINDOW_MS,
+  RATE_LIMIT_MAX_POSTS,
 } from '../shared/constants';
 import { makeSealKey, seal, countSharedSlots, type SealKey } from './seal';
 import { ensureSeedNote } from './seed';
@@ -56,9 +58,7 @@ function dot(a: number[], b: number[]): number {
   return s;
 }
 
-// 同一 IP 每分钟最多发送一条留言
-const RATE_LIMIT_MS = 60_000;
-
+// 同一 IP 每个固定窗口（默认 60s）内最多发送 RATE_LIMIT_MAX_POSTS 条留言
 function clientIp(request: Request): string {
   const cf = request.headers.get('CF-Connecting-IP');
   if (cf) return cf;
@@ -69,21 +69,48 @@ function clientIp(request: Request): string {
 
 async function checkRateLimit(env: Env, ip: string): Promise<boolean> {
   const now = Date.now();
-  const row = await env.DB.prepare('SELECT last_post_at FROM rate_limits WHERE ip = ?')
-    .bind(ip)
-    .first<{ last_post_at: number }>();
-  if (row && now - row.last_post_at < RATE_LIMIT_MS) return false;
-  await env.DB.prepare(
-    'INSERT INTO rate_limits (ip, last_post_at) VALUES (?, ?) ON CONFLICT(ip) DO UPDATE SET last_post_at = excluded.last_post_at',
+  const row = await env.DB.prepare(
+    'SELECT last_post_at, window_started_at, post_count FROM rate_limits WHERE ip = ?',
   )
-    .bind(ip, now)
+    .bind(ip)
+    .first<{ last_post_at: number | null; window_started_at: number | null; post_count: number | null }>();
+
+  // 无记录，或窗口已过期 → 开启新窗口并计为第 1 条
+  if (
+    !row ||
+    row.window_started_at == null ||
+    now - row.window_started_at >= RATE_LIMIT_WINDOW_MS
+  ) {
+    await env.DB.prepare(
+      'INSERT INTO rate_limits (ip, last_post_at, window_started_at, post_count) VALUES (?, ?, ?, 1) ' +
+        'ON CONFLICT(ip) DO UPDATE SET last_post_at = excluded.last_post_at, ' +
+        'window_started_at = excluded.window_started_at, post_count = 1',
+    )
+      .bind(ip, now, now)
+      .run();
+    return true;
+  }
+
+  // 窗口内：达到上限则拒绝
+  if ((row.post_count ?? 0) >= RATE_LIMIT_MAX_POSTS) return false;
+
+  await env.DB.prepare(
+    'UPDATE rate_limits SET last_post_at = ?, post_count = post_count + 1 WHERE ip = ?',
+  )
+    .bind(now, ip)
     .run();
   return true;
 }
 
 async function createNote(request: Request, env: Env): Promise<Response> {
   if (!(await checkRateLimit(env, clientIp(request)))) {
-    return json({ error: '发送太频繁，请稍后再试', rateLimited: true }, 429);
+    return json(
+      {
+        error: `发送太频繁：每分钟最多发送 ${RATE_LIMIT_MAX_POSTS} 条，请稍后再试`,
+        rateLimited: true,
+      },
+      429,
+    );
   }
 
   let body: Record<string, unknown>;

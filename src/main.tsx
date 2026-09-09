@@ -1,9 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-// Self-hosted Montserrat (700/900): bundled locally so display text renders in
-// the real font immediately instead of flashing a fallback (FOUT).
-import '@fontsource/montserrat/700.css';
-import '@fontsource/montserrat/900.css';
+// Montserrat (latin 700/900) is self-hosted under /public/fonts and declared
+// with font-display: optional in index.css; index.html preloads both woff2
+// files so headings render in the real font without a fallback flash (FOUT).
 import './index.css';
 import App from './App';
 
