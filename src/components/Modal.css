@@ -123,9 +123,40 @@
   }
 }
 
+/* 收起：打开动画的反向版，稍快一点（160ms），淡出 + 轻微下沉回缩 */
+.modal--closing {
+  animation: modal-fade-out 160ms ease forwards;
+}
+
+.modal--closing .modal__panel {
+  animation: modal-pop-out 160ms ease forwards;
+}
+
+@keyframes modal-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-pop-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .modal,
-  .modal__panel {
+  .modal__panel,
+  .modal--closing,
+  .modal--closing .modal__panel {
     animation: none;
   }
 }
