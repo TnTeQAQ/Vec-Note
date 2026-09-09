@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <title>Vec-Note · 向量留言板</title>
+    <script>
+      // 首屏绘制前确定主题，避免闪烁：
+      // 1) 用户手动切换过 → 用 localStorage 中的显式选择；
+      // 2) 否则跟随系统 prefers-color-scheme；
+      // 3) 再否则默认浅色。
+      (function () {
+        try {
+          var saved = localStorage.getItem('vec-note:theme');
+          var theme =
+            saved === 'light' || saved === 'dark'
+              ? saved
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {
+          /* storage / matchMedia 不可用时保持 CSS 默认浅色 */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

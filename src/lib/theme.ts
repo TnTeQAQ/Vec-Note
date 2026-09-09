@@ -2,6 +2,35 @@ export type Theme = 'light' | 'dark';
 
 const LS_KEY = 'vec-note:theme';
 const EVENT = 'vec-note:theme-change';
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
+function darkQuery(): MediaQueryList | null {
+  try {
+    return window.matchMedia(DARK_QUERY);
+  } catch {
+    return null;
+  }
+}
+
+/** 系统当前配色（不支持 matchMedia 时视为浅色） */
+function systemTheme(): Theme {
+  return darkQuery()?.matches ? 'dark' : 'light';
+}
+
+/** 用户手动选定的主题；未选择或存储不可用时为 null（此时跟随系统） */
+function savedTheme(): Theme | null {
+  try {
+    const v = localStorage.getItem(LS_KEY);
+    return v === 'light' || v === 'dark' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 生效主题：显式选择优先，否则跟随系统配色，再否则浅色 */
+function resolveTheme(): Theme {
+  return savedTheme() ?? systemTheme();
+}
 
 export function getTheme(): Theme {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
@@ -27,7 +56,30 @@ function applyFavicon(theme: Theme) {
   link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-applyFavicon(getTheme());
+/**
+ * 模块加载时：与 index.html 的首屏引导保持一致（显式选择 > 系统配色），
+ * 并在用户未手动选择时实时跟随系统配色变化。
+ */
+function initTheme() {
+  const theme = resolveTheme();
+  document.documentElement.dataset.theme = theme;
+  applyFavicon(theme);
+
+  const mq = darkQuery();
+  if (mq && typeof mq.addEventListener === 'function') {
+    mq.addEventListener('change', () => {
+      // 用户一旦手动切换（localStorage 有值），系统变化不再覆盖
+      if (savedTheme() === null) {
+        const next = systemTheme();
+        document.documentElement.dataset.theme = next;
+        applyFavicon(next);
+        window.dispatchEvent(new CustomEvent<Theme>(EVENT, { detail: next }));
+      }
+    });
+  }
+}
+
+initTheme();
 
 export function setTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
