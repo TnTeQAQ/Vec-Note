@@ -126,11 +126,24 @@ pnpm deploy
   - `CF_DATABASE_ID`：`pnpm db:create` 输出的 UUID（部署必需）
   - `CF_WORKER_NAME`：Worker 名称（可选，默认 `vec-note`；在 workers.dev 上需唯一）
   - `CF_ROUTE_PATTERN`：自定义域名，如 `notes.example.com`（可选）
+  - `CF_SITE_URL`：对外规范地址，如 `https://notes.example.com`（可选；不设置时，canonical / OG 链接与 sitemap 默认按请求 Host 自动生成）
 - **Secrets（密钥）**
   - `CLOUDFLARE_API_TOKEN`
   - `CLOUDFLARE_ACCOUNT_ID`
 
 工作流会在 CI 中生成 `wrangler.jsonc`（该文件已 gitignore），先执行幂等的 D1 迁移，再部署 Worker。
+
+## SEO（搜索引擎优化）
+
+站点内置了搜索引擎与社交分享所需的基础能力，开箱即用：
+
+- **真实分页 URL**：留言主页是 `/`，技术原理长文在独立的 `/about`（可分享、可被单独收录）；应用内导航仍保持地址栏干净的单根体验。
+- **页面级 meta**：每页独立的 `<title>`、`meta description`、canonical、Open Graph / Twitter 卡片标签，以及 JSON-LD 结构化数据（`WebSite` / `TechArticle`），由 Worker 服务端注入（数据源 `src/shared/seo.ts`），客户端导航时同步更新。
+- **`/robots.txt` 与 `/sitemap.xml`**：由 Worker 按当前访问域名动态生成，仓库中不包含任何私有域名。
+- **真实 404**：未知路径返回真正的 HTTP 404，不再是 SPA 软 200 回退。
+- **分享大图**：内置品牌分享图 `/og.svg`。
+
+部署后建议到 [Google Search Console](https://search.google.com/search-console)、[Bing Webmaster Tools](https://www.bing.com/webmasters)（面向百度还可注册[百度搜索资源平台](https://ziyuan.baidu.com/)）验证站点，提交 `https://<你的域名>/sitemap.xml`，并对 `/` 与 `/about` 申请抓取收录。若站点可通过多个域名访问，请设置 `SITE_URL`（或 CI 变量 `CF_SITE_URL`），让 canonical 始终指向你偏好的域名。
 
 ## 配置一览
 
@@ -139,6 +152,7 @@ pnpm deploy
 | `wrangler.jsonc` | 仅本地（从 `wrangler.example.jsonc` 复制） | Worker 名、可选自定义域名、D1 `database_id` |
 | `.dev.vars` | 仅本地 | `wrangler dev` 使用的 `VEC_SEAL_SECRET` |
 | `VEC_SEAL_SECRET` | Worker Secret | 服务端密封密钥，部署后保持稳定 |
+| `SITE_URL` | Worker 变量（可选） | SEO 标签与 sitemap 使用的规范地址，缺省按请求 Host 生成 |
 | 检索阈值 | `src/shared/constants.ts` | `SIMILARITY_EPSILON`、抖动 σ、词项保留概率等 |
 | 内容长度上限 | `src/shared/constants.ts` | `CONTENT_MAX_LENGTH`（16000） |
 

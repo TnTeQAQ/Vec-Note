@@ -7,7 +7,9 @@ name: Deploy to Cloudflare Workers
 #   and add the Secrets CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID,
 #   plus the Variables CF_DATABASE_ID (required for deploy) and
 #   CF_WORKER_NAME (optional, defaults to vec-note),
-#   CF_ROUTE_PATTERN (optional, e.g. notes.example.com).
+#   CF_ROUTE_PATTERN (optional, e.g. notes.example.com),
+#   CF_SITE_URL (optional, e.g. https://notes.example.com — canonical/OG origin;
+#                when unset the Worker derives it from each request Host).
 on:
   push:
     branches: [main]
@@ -48,6 +50,7 @@ jobs:
       CF_WORKER_NAME: ${{ vars.CF_WORKER_NAME }}
       CF_DATABASE_ID: ${{ vars.CF_DATABASE_ID }}
       CF_ROUTE_PATTERN: ${{ vars.CF_ROUTE_PATTERN }}
+      CF_SITE_URL: ${{ vars.CF_SITE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,13 +84,16 @@ jobs:
                 logs: { enabled: true, head_sampling_rate: 1, invocation_logs: true, persist: true },
                 traces: { enabled: true, head_sampling_rate: 1, persist: true },
               },
-              assets: { directory: "./dist", binding: "ASSETS" },
+              assets: { directory: "./dist", binding: "ASSETS", run_worker_first: true },
               d1_databases: [
                 { binding: "DB", database_name: "vec-note", database_id: process.env.CF_DATABASE_ID, migrations_dir: "migrations" },
               ],
             };
             if (process.env.CF_ROUTE_PATTERN) {
               cfg.routes = [{ pattern: process.env.CF_ROUTE_PATTERN, custom_domain: true }];
+            }
+            if (process.env.CF_SITE_URL) {
+              cfg.vars = { SITE_URL: process.env.CF_SITE_URL };
             }
             fs.writeFileSync("wrangler.jsonc", JSON.stringify(cfg, null, 2) + "\n");
           '

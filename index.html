@@ -4,7 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <title>Vec-Note · 向量留言板</title>
+
+    <!--
+      SEO 模板：%VEC_*% 占位符由 Cloudflare Worker 按请求路径/域名在响应时替换
+      （src/worker/seo.ts）。首页默认值直接写好，保证未经 Worker 的环境（如
+      vite preview）也有完整 meta；客户端 useSeo 在 hydrate 后再次同步。
+    -->
+    <title>%VEC_TITLE%</title>
+    <meta name="robots" content="index,follow" />
+    <meta name="description" content="%VEC_DESCRIPTION%" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
+    <link rel="canonical" href="%VEC_ORIGIN%%VEC_PATH%" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="%VEC_OG_TYPE%" />
+    <meta property="og:site_name" content="Vec-Note" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content="%VEC_TITLE%" />
+    <meta property="og:description" content="%VEC_DESCRIPTION%" />
+    <meta property="og:url" content="%VEC_ORIGIN%%VEC_PATH%" />
+    <meta property="og:image" content="%VEC_ORIGIN%/og.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="%VEC_TITLE%" />
+    <meta name="twitter:description" content="%VEC_DESCRIPTION%" />
+    <meta name="twitter:image" content="%VEC_ORIGIN%/og.svg" />
+
+    <!-- 结构化数据（Worker 按页面注入；客户端导航时 useSeo 会替换） -->
+    <script type="application/ld+json" id="seo-jsonld">%VEC_JSONLD%</script>
+
     <script>
       // 首屏绘制前确定主题，避免闪烁：
       // 1) 用户手动切换过 → 用 localStorage 中的显式选择；

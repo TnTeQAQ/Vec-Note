@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
 import { PageRouterProvider } from './router/router';
 import { usePageRouter } from './router/context';
-import { getPageTitle, renderPage } from './router/pages';
+import { renderPage } from './router/pages';
 import { PageRevealProvider } from './components/PageReveal';
+import { useSeo } from './hooks/useSeo';
 import AdminProvider from './components/AdminProvider';
 import { ToastProvider, useToast } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -32,9 +32,8 @@ function PageViewBoundary() {
 function Shell() {
   const { page } = usePageRouter();
 
-  useEffect(() => {
-    document.title = `${getPageTitle(page.pageId)} · Vec-Note`;
-  }, [page]);
+  // 页面 title / description / canonical / OG / JSON-LD 随路由同步
+  useSeo(page.pageId);
 
   return (
     <PageRevealProvider>

@@ -9,6 +9,55 @@ const BASE = 'http://127.0.0.1:8787';
 
 describe('e2e smoke (live wrangler dev)', () => {
   it(
+    'SEO: /about serves injected meta, robots/sitemap exist, unknown path is real 404',
+    async () => {
+      // 首页 HTML 由 Worker 注入首页 SEO（不依赖客户端 JS）
+      const home = await fetch(`${BASE}/`);
+      expect(home.status).toBe(200);
+      const homeHtml = await home.text();
+      expect(homeHtml).toContain('rel="canonical"');
+      expect(homeHtml).toContain('property="og:title"');
+      expect(homeHtml).not.toMatch(/%VEC_[A-Z_]+%/);
+      expect(homeHtml).toContain('"@type":"WebSite"');
+
+      // 关于页是独立可收录 URL，服务端即输出关于页专属标签
+      const about = await fetch(`${BASE}/about`);
+      expect(about.status).toBe(200);
+      const aboutHtml = await about.text();
+      // 绝对地址的主机部分在本地 dev 下可能来自 wrangler.jsonc 的自定义域名，
+      // 因此只校验 og:url 存在且指向 /about 路径。
+      expect(aboutHtml).toMatch(/property="og:url"[^>]*content="[^"]*\/about"/);
+      expect(aboutHtml).toContain('"TechArticle"');
+      expect(aboutHtml).not.toMatch(/%VEC_[A-Z_]+%/);
+
+      const robots = await fetch(`${BASE}/robots.txt`);
+      expect(robots.status).toBe(200);
+      expect(robots.headers.get('content-type')).toContain('text/plain');
+      const robotsBody = await robots.text();
+      expect(robotsBody).toContain('Disallow: /api/');
+      expect(robotsBody).toContain('Sitemap:');
+
+      const sitemap = await fetch(`${BASE}/sitemap.xml`);
+      expect(sitemap.status).toBe(200);
+      const sitemapBody = await sitemap.text();
+      expect(sitemapBody).toContain('/about');
+      expect(sitemapBody).toContain('<urlset');
+
+      // 未知路径：真实 404 状态 + noindex（消除 soft 204 软回退）
+      const missing = await fetch(`${BASE}/no-such-page`);
+      expect(missing.status).toBe(404);
+      const missingHtml = await missing.text();
+      expect(missingHtml).toContain('noindex');
+
+      // /api 404 仍是 JSON，不被 HTML 回退吞掉
+      const apiMissing = await fetch(`${BASE}/api/does-not-exist`);
+      expect(apiMissing.status).toBe(404);
+      expect(apiMissing.headers.get('content-type')).toContain('application/json');
+    },
+    30000,
+  );
+
+  it(
     'submit 手机/测试内容 → search 手机 hits (解密成功), 手 hits (相似), 电话 no hit',
     async () => {
       const title = '手机';

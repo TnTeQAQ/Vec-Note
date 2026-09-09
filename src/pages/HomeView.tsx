@@ -11,6 +11,7 @@ import SearchForm, { type SearchOutcome } from '../components/SearchForm';
 import NoteCard from '../components/NoteCard';
 import { useAdmin } from '../components/AdminProvider';
 import { useToast } from '../components/Toast';
+import { usePageRouter } from '../router/context';
 import './HomeView.css';
 
 /** 每页条数 */
@@ -42,6 +43,7 @@ export default function HomeView() {
   const [search, setSearch] = useState<SearchOutcome | null>(null);
   const [composing, setComposing] = useState(false);
   const { isAdmin, deleteNote, pinNote } = useAdmin();
+  const { pushScrollAnchor } = usePageRouter();
   const { toast } = useToast();
 
   // 删除确认
@@ -156,8 +158,9 @@ export default function HomeView() {
   const handleResults = (o: SearchOutcome | null) => {
     setSearch(o);
     if (!o) return;
-    // 结果渲染后平滑跳到留言/结果区
-    requestAnimationFrame(() => scrollToId('notes'));
+    // 压入同页锚点历史后平滑跳到结果区：浏览器「返回」会回到顶部搜索区，
+    // 「前进」再回到结果区；连续搜索只替换这一条历史，不刷屏历史栈。
+    pushScrollAnchor('notes');
   };
 
   const handleCreated = () => {

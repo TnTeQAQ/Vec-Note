@@ -15,11 +15,14 @@ import {
   deleteNoteAsAdmin,
   setNotePinAsAdmin,
 } from './admin';
+import { handleSeoAsset } from './seo';
 
 interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
   VEC_SEAL_SECRET: string;
+  /** 可选：对外规范站点地址（如 https://notes.example.com），缺省按请求 Host 生成 */
+  SITE_URL?: string;
 }
 
 let cachedKey: SealKey | null = null;
@@ -289,11 +292,12 @@ export default {
       }
     }
 
-    // 静态资源（含前端构建产物）；未知路径在 GET 时回退到 index.html（SPA）。
-    const asset = await env.ASSETS.fetch(request);
-    if (asset.status === 404 && request.method === 'GET') {
-      return env.ASSETS.fetch(new Request(`${url.origin}/index.html`, request));
-    }
-    return asset;
+    // 静态资源 + SEO：robots/sitemap 动态生成、页面 meta 按路径注入、
+    // 未知 GET 路径返回真实 404（不再 SPA 软 200 回退）。
+    const seo = await handleSeoAsset(request, env);
+    if (seo) return seo;
+
+    // 非 GET 的静态资源请求：直接透传给 ASSETS
+    return env.ASSETS.fetch(request);
   },
 };

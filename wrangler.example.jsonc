@@ -21,8 +21,16 @@
   },
   "assets": {
     "directory": "./dist",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Required: the Worker must run before static assets so it can inject
+    // SEO tags into / and /about; hashed assets pass through unchanged.
+    "run_worker_first": true
   },
+  // Optional canonical public origin used for canonical links, Open Graph
+  // URLs, robots.txt and sitemap.xml. Leave it out to derive the origin from
+  // each request's Host automatically.
+  // "vars": { "SITE_URL": "https://notes.example.com" },
+  //
   // Optional custom domain. Uncomment and replace with your own domain
   // (the zone must be managed by your Cloudflare account).
   // "routes": [

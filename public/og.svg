@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f2f0f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- logo mark -->
+  <g transform="translate(96 96)">
+    <rect width="120" height="120" rx="26" fill="#08060d"/>
+    <g transform="translate(22 20) scale(0.075)" fill="#ffffff">
+      <path d="M511.913993 928.016126c-8.256677 0-16.341341-3.096254-22.705863-9.460776l-95.983874-95.983874c-12.55703-12.55703-12.55703-32.682681 0-45.239711s32.682681-12.55703 45.239711 0l73.450025 73.450025 73.450025-73.450025c6.020494-6.020494 14.105157-9.460776 22.705863-9.460776l223.962372 0c17.717453 0 31.994625-14.277171 31.994625-31.994625L864.026877 223.962372c0-17.545439-14.277171-31.994625-31.994625-31.994625l-639.892491 0c-17.545439 0-31.994625 14.449185-31.994625 31.994625l0 511.913993c0 17.717453 14.449185 31.994625 31.994625 31.994625l95.983874 0c17.717453 0 31.994625 14.277171 31.994625 31.994625s-14.277171 31.994625-31.994625 31.994625l-95.983874 0c-52.980346 0-95.983874-43.003528-95.983874-95.983874L96.155888 223.962372c0-52.980346 43.003528-95.983874 95.983874-95.983874l639.892491 0c52.980346 0 95.983874 43.003528 95.983874 95.983874l0 511.913993c0 52.980346-43.003528 95.983874-95.983874 95.983874L621.142953 831.860239 534.619856 918.55535C528.427348 924.747858 520.17067 928.016126 511.913993 928.016126z"/>
+      <path d="M335.943558 511.913993c-26.490173 0-47.991937-21.501764-47.991937-47.991937s21.501764-47.991937 47.991937-47.991937 47.991937 21.501764 47.991937 47.991937S362.433731 511.913993 335.943558 511.913993z"/>
+      <path d="M527.911305 511.913993c-26.490173 0-47.991937-21.501764-47.991937-47.991937s21.501764-47.991937 47.991937-47.991937 47.991937 21.501764 47.991937 47.991937S554.401478 511.913993 527.911305 511.913993z"/>
+      <path d="M720.051067 511.913993c-26.490173 0-47.991937-21.501764-47.991937-47.991937s21.501764-47.991937 47.991937-47.991937c26.490173 0 47.991937 21.501764 47.991937 47.991937S746.369226 511.913993 720.051067 511.913993z"/>
+    </g>
+  </g>
+
+  <text x="96" y="356" font-family="Montserrat, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="104" font-weight="900" fill="#08060d">Vec-Note</text>
+  <text x="96" y="436" font-family="Montserrat, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="38" font-weight="700" fill="#6b6375">向量留言板 · 标题明文不入库</text>
+
+  <g transform="translate(96 498)" fill="none" stroke="#08060d" stroke-width="2">
+    <rect x="0" y="0" width="230" height="56" rx="28"/>
+    <text x="115" y="37" text-anchor="middle" font-family="Montserrat, 'PingFang SC', sans-serif" font-size="24" font-weight="700" fill="#08060d" stroke="none">BLS12-381</text>
+  </g>
+  <g transform="translate(342 498)" fill="none" stroke="#08060d" stroke-width="2">
+    <rect x="0" y="0" width="230" height="56" rx="28"/>
+    <text x="115" y="37" text-anchor="middle" font-family="Montserrat, 'PingFang SC', sans-serif" font-size="24" font-weight="700" fill="#08060d" stroke="none">向量搜索</text>
+  </g>
+  <g transform="translate(588 498)" fill="none" stroke="#08060d" stroke-width="2">
+    <rect x="0" y="0" width="260" height="56" rx="28"/>
+    <text x="130" y="37" text-anchor="middle" font-family="Montserrat, 'PingFang SC', sans-serif" font-size="24" font-weight="700" fill="#08060d" stroke="none">Cloudflare Workers</text>
+  </g>
+</svg>
