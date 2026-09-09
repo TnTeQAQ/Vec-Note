@@ -1,0 +1,46 @@
+// Copy this file to wrangler.jsonc and fill in your own values.
+// wrangler.jsonc is git-ignored: it may contain your custom domain / D1 id.
+{
+  // Your Worker name (must be unique on Cloudflare if you deploy to
+  // the default *.workers.dev subdomain).
+  "name": "vec-note",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-09-04",
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    }
+  },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  // Optional custom domain. Uncomment and replace with your own domain
+  // (the zone must be managed by your Cloudflare account).
+  // "routes": [
+  //   {
+  //     "pattern": "notes.example.com",
+  //     "custom_domain": true
+  //   }
+  // ],
+  // D1 is an independent managed resource, bound only by its database_id.
+  // `pnpm db:create` creates the database; paste the printed id below.
+  // Deploying the Worker never drops or recreates the database; schema
+  // changes are applied explicitly via the idempotent migrations.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vec-note",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

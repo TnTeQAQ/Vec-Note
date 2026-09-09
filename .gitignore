@@ -2,5 +2,7 @@ node_modules/
 dist/
 .wrangler/
 .dev.vars
+# 本地私有部署配置（含自定义域名 / D1 database_id），从 wrangler.example.jsonc 复制
+wrangler.jsonc
 *.log
 .DS_Store

@@ -1,13 +1,20 @@
 name: Deploy to Cloudflare Workers
 
-# push 到 main 自动部署；也支持在 Actions 页面手动触发
+# Forks run typecheck + build but skip deployment by default.
+# To enable deploys for your fork:
+#   Settings → Secrets and variables → Actions → Variables → New variable
+#     Name:  ENABLE_DEPLOY   Value: true
+#   and add the Secrets CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID,
+#   plus the Variables CF_DATABASE_ID (required for deploy) and
+#   CF_WORKER_NAME (optional, defaults to vec-note),
+#   CF_ROUTE_PATTERN (optional, e.g. notes.example.com).
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,15 +37,68 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # 迁移全部为 IF NOT EXISTS 幂等；先迁移后部署，避免新代码引用到旧表结构
+  deploy:
+    needs: verify
+    # Skip on forks unless the repository explicitly opts in
+    if: ${{ vars.ENABLE_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_WORKER_NAME: ${{ vars.CF_WORKER_NAME }}
+      CF_DATABASE_ID: ${{ vars.CF_DATABASE_ID }}
+      CF_ROUTE_PATTERN: ${{ vars.CF_ROUTE_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      # wrangler.jsonc is git-ignored (it carries per-deployment domain / D1 id);
+      # generate it in CI from repository variables.
+      - name: Generate wrangler.jsonc
+        run: |
+          if [ -z "$CF_DATABASE_ID" ]; then
+            echo "::error::CF_DATABASE_ID repository variable is required (run 'pnpm db:create' to get one)"
+            exit 1
+          fi
+          node -e '
+            const fs = require("node:fs");
+            const cfg = {
+              name: process.env.CF_WORKER_NAME || "vec-note",
+              main: "src/worker/index.ts",
+              compatibility_date: "2026-09-04",
+              observability: {
+                logs: { enabled: true, head_sampling_rate: 1, invocation_logs: true, persist: true },
+                traces: { enabled: true, head_sampling_rate: 1, persist: true },
+              },
+              assets: { directory: "./dist", binding: "ASSETS" },
+              d1_databases: [
+                { binding: "DB", database_name: "vec-note", database_id: process.env.CF_DATABASE_ID, migrations_dir: "migrations" },
+              ],
+            };
+            if (process.env.CF_ROUTE_PATTERN) {
+              cfg.routes = [{ pattern: process.env.CF_ROUTE_PATTERN, custom_domain: true }];
+            }
+            fs.writeFileSync("wrangler.jsonc", JSON.stringify(cfg, null, 2) + "\n");
+          '
+
+      - name: Build
+        run: pnpm build
+
+      # All migrations are IF NOT EXISTS / idempotent; migrate before deploy
+      # so new code never runs against the old schema.
       - name: Apply D1 migrations
         run: pnpm wrangler d1 migrations apply vec-note --remote
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Worker
         run: pnpm wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
